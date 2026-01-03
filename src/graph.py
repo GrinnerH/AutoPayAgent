@@ -5,6 +5,7 @@ from nodes import (
     header_parser,
     human_approver,
     intent_router,
+    non_payment_responder,
     payment_signer,
     payment_negotiator,
     request_executor,
@@ -35,15 +36,13 @@ def route_after_request(state: AgentState) -> str:
 def route_after_intent(state: AgentState) -> str:
     intent = state.get("intent") or {}
     if intent.get("is_payment_task") is False:
-        return END
+        return "non_payment_responder"
     return "service_registry"
 
 
 def route_after_risk(state: AgentState) -> str:
-    ctx = state["payment_ctx"]
     decision = state.get("policy_decision")
     if decision == "reject":
-        ctx["error_type"] = ctx.get("error_type") or "policy_reject"
         return "error_handler"
     if decision == "hitl":
         return "human_approver"
@@ -58,7 +57,6 @@ def route_after_human(state: AgentState) -> str:
     decision = state.get("user_decision")
     if decision == "approve":
         return "payment_signer"
-    state["payment_ctx"]["error_type"] = "user_reject"
     return "error_handler"
 
 
@@ -79,7 +77,7 @@ def route_after_reflection(state: AgentState) -> str:
         return "payment_negotiator"
     if action == "retry_request":
         return "request_executor"
-    if action == "human_approval":
+    if action == "human_approval" or notes.get("force_human"):
         return "human_approver"
     return END
 
@@ -88,6 +86,7 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
     builder = StateGraph(AgentState)
     builder.add_node("intent_router", intent_router)
     builder.add_node("service_registry", service_registry)
+    builder.add_node("non_payment_responder", non_payment_responder)
     builder.add_node("request_executor", request_executor)
     builder.add_node("header_parser", header_parser)
     builder.add_node("payment_negotiator", payment_negotiator)
@@ -100,6 +99,7 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
 
     builder.set_entry_point("intent_router")
     builder.add_conditional_edges("intent_router", route_after_intent)
+    builder.add_edge("non_payment_responder", END)
     builder.add_edge("service_registry", "request_executor")
     builder.add_conditional_edges("request_executor", route_after_request)
     builder.add_edge("header_parser", "payment_negotiator")

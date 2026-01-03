@@ -5,7 +5,13 @@ from dataclasses import dataclass
 from typing import Annotated, Any, Dict, List, Optional, TypedDict
 from urllib.parse import urlparse
 
-from langchain.messages import AnyMessage
+from langchain_core.messages import AnyMessage
+
+
+def merge_dict_shallow(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+    merged = dict(old or {})
+    merged.update(new or {})
+    return merged
 
 class PaymentContext(TypedDict):
     target_url: str
@@ -33,9 +39,9 @@ class PaymentContext(TypedDict):
 class AgentState(TypedDict):
     messages: Annotated[List[AnyMessage], operator.add]
     thread_id: Optional[str]
-    payment_ctx: PaymentContext
+    payment_ctx: Annotated[PaymentContext, merge_dict_shallow]
     http_client: Optional[Any]
-    payment_preferences: Dict[str, Any]
+    payment_preferences: Annotated[Dict[str, Any], merge_dict_shallow]
     task_text: Optional[str]
     intent: Optional[Dict[str, Any]]
     service_candidates: List[Dict[str, Any]]
@@ -44,17 +50,17 @@ class AgentState(TypedDict):
     policy_decision: Optional[str]
     reflection_notes: Optional[Dict[str, Any]]
     risk_score: Optional[float]
-    risk_reasons: List[str]
+    risk_reasons: Annotated[List[str], operator.add]
     llm_client: Optional[Any]
-    policy: Dict[str, Any]
+    policy: Annotated[Dict[str, Any], merge_dict_shallow]
     wallet_balance: float
     session_spend: float
     budget_limit: float
     auto_approve_threshold: float
     human_approval_required: bool
     user_decision: Optional[str]
-    risk_flags: Dict[str, Any]
-    audit_log: List[Dict[str, Any]]
+    risk_flags: Annotated[Dict[str, Any], merge_dict_shallow]
+    audit_log: Annotated[List[Dict[str, Any]], operator.add]
 
 
 @dataclass
@@ -113,6 +119,8 @@ def safe_base64_json(raw: str) -> Dict[str, Any]:
     padded = raw + "=" * (-len(raw) % 4)
     decoded = base64.b64decode(padded).decode("utf-8")
     return json.loads(decoded)
+
+
 
 
 def extract_amount_usdc(accept: Dict[str, Any], requirements: Dict[str, Any]) -> float:
@@ -210,6 +218,7 @@ def basic_intent_from_task(task_text: str) -> Dict[str, Any]:
     return {
         "is_payment_task": True,
         "service_type": service_type,
+        "service_query": task_text,
         "query_params": {"q": task_text},
         "constraints": {"max_cost": 1.0},
     }
@@ -218,15 +227,27 @@ def basic_intent_from_task(task_text: str) -> Dict[str, Any]:
 def default_service_registry() -> List[Dict[str, Any]]:
     return [
         {
-            "name": "mock-x402",
-            "url": "http://127.0.0.1:18080/resource",
+            "name": "Mock Weather Pro",
+            "service_type": "weather",
+            "url": "http://127.0.0.1:18081/api/weather",
             "http_method": "GET",
             "supports_x402": True,
             "reputation": "ok",
             "whitelist_tag": True,
             "headers": {},
             "body": None,
-        }
+        },
+        {
+            "name": "Mock Market Intel",
+            "service_type": "market_report",
+            "url": "http://127.0.0.1:18082/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": True,
+            "reputation": "ok",
+            "whitelist_tag": False,
+            "headers": {},
+            "body": None,
+        },
     ]
 
 
@@ -238,10 +259,12 @@ def parse_service_identity(url: str) -> Dict[str, str]:
         "service_scheme": parsed.scheme or "",
     }
 
-
-
-
-def default_state(target_url: str, http_method: str = "GET", config: Optional[Dict[str, Any]] = None) -> AgentState:
+def default_state(
+    target_url: Optional[str] = None,
+    http_method: str = "GET",
+    config: Optional[Dict[str, Any]] = None,
+    task_text: Optional[str] = None,
+) -> AgentState:
     cfg = config or {}
     return {
         "messages": [],
@@ -274,7 +297,7 @@ def default_state(target_url: str, http_method: str = "GET", config: Optional[Di
             "asset": str(cfg.get("preferred_asset", "usdc")).lower(),
             "scheme": str(cfg.get("preferred_scheme", "exact")).lower(),
         },
-        "task_text": None,
+        "task_text": task_text,
         "intent": None,
         "service_candidates": [],
         "selected_service": None,

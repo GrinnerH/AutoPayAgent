@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
 from langchain.chat_models import init_chat_model
-from langchain.messages import HumanMessage
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from pydantic import BaseModel, Field
 
 from tools import find_services, get_payee_reputation, get_wallet_balance, list_services
@@ -16,6 +15,7 @@ from tools import find_services, get_payee_reputation, get_wallet_balance, list_
 class IntentOutput(BaseModel):
     is_payment_task: bool = Field(default=True)
     service_type: str
+    service_query: str = Field(default="")
     query_params: Dict[str, Any]
     constraints: Dict[str, Any]
 
@@ -24,6 +24,12 @@ class NegotiationOutput(BaseModel):
     selected_index: int = Field(default=0)
     reason: str
     policy_decision: str = Field(default="auto")
+
+
+class ServiceSelectionOutput(BaseModel):
+    selected_index: int = Field(default=0)
+    service_name: Optional[str] = None
+    reason: str
 
 
 class ReflectionOutput(BaseModel):
@@ -35,6 +41,7 @@ class ReflectionOutput(BaseModel):
 @dataclass
 class AgentBundle:
     intent_agent: Any
+    service_agent: Any
     negotiation_agent: Any
     reflection_agent: Any
 
@@ -44,23 +51,41 @@ class AgentBundle:
             return agent.invoke({"messages": messages}, config)
         return agent.invoke({"messages": messages})
 
+    def _delta_messages(self, history: List[BaseMessage], result: Dict[str, Any]) -> List[BaseMessage]:
+        new_messages = result.get("messages", [])
+        if not new_messages:
+            return []
+        if len(new_messages) >= len(history) and new_messages[: len(history)] == history:
+            return new_messages[len(history) :]
+        return new_messages
+
     def intent(
         self, messages: List[BaseMessage], task_text: str, thread_id: Optional[str]
     ) -> tuple[IntentOutput, List[BaseMessage]]:
-        result = self._invoke(self.intent_agent, messages + [HumanMessage(task_text)], thread_id)
-        return result["structured_response"], result.get("messages", messages)
+        history = messages + [HumanMessage(task_text)]
+        result = self._invoke(self.intent_agent, history, thread_id)
+        return result["structured_response"], self._delta_messages(history, result)
 
     def negotiate(
         self, messages: List[BaseMessage], payload: Dict[str, Any], thread_id: Optional[str]
     ) -> tuple[NegotiationOutput, List[BaseMessage]]:
-        result = self._invoke(self.negotiation_agent, messages + [HumanMessage(str(payload))], thread_id)
-        return result["structured_response"], result.get("messages", messages)
+        history = messages + [HumanMessage(str(payload))]
+        result = self._invoke(self.negotiation_agent, history, thread_id)
+        return result["structured_response"], self._delta_messages(history, result)
+
+    def select_service(
+        self, messages: List[BaseMessage], payload: Dict[str, Any], thread_id: Optional[str]
+    ) -> tuple[ServiceSelectionOutput, List[BaseMessage]]:
+        history = messages + [HumanMessage(str(payload))]
+        result = self._invoke(self.service_agent, history, thread_id)
+        return result["structured_response"], self._delta_messages(history, result)
 
     def reflect(
         self, messages: List[BaseMessage], payload: Dict[str, Any], thread_id: Optional[str]
     ) -> tuple[ReflectionOutput, List[BaseMessage]]:
-        result = self._invoke(self.reflection_agent, messages + [HumanMessage(str(payload))], thread_id)
-        return result["structured_response"], result.get("messages", messages)
+        history = messages + [HumanMessage(str(payload))]
+        result = self._invoke(self.reflection_agent, history, thread_id)
+        return result["structured_response"], self._delta_messages(history, result)
 
 
 def _normalize_model_name(model_name: str) -> str:
@@ -87,9 +112,20 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
         tools=[list_services, find_services],
         system_prompt=(
             "You are an intent extraction agent. "
-            "Extract structured intent for paid API tasks."
+            "Extract structured intent for paid API tasks. "
+            "Include a service_query suitable for service discovery."
         ),
         response_format=ToolStrategy(IntentOutput),
+    )
+
+    service_agent = create_agent(
+        model=model,
+        tools=[list_services, find_services],
+        system_prompt=(
+            "You are a service selection agent. "
+            "Use tools to find candidate services and pick the best match."
+        ),
+        response_format=ToolStrategy(ServiceSelectionOutput),
     )
 
     negotiation_agent = create_agent(
@@ -114,6 +150,7 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
 
     return AgentBundle(
         intent_agent=intent_agent,
+        service_agent=service_agent,
         negotiation_agent=negotiation_agent,
         reflection_agent=reflection_agent,
     )

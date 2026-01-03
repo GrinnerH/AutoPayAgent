@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from langchain.tools import tool
+from langchain_core.tools import tool
 
 from utils import default_service_registry
 
@@ -16,9 +16,10 @@ def find_services(query: str, service_type: Optional[str] = None) -> List[Dict[s
     results = []
     for svc in services:
         name = str(svc.get("name", "")).lower()
+        svc_type = str(svc.get("service_type", "")).lower()
         if query_l and query_l in name:
             results.append(svc)
             continue
-        if service_l and service_l in name:
+        if service_l and (service_l in name or svc_type == service_l):
             results.append(svc)
     return results or services
