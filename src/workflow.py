@@ -18,7 +18,7 @@ def run_workflow(state: AgentState, wallet_provider: WalletProvider, checkpointe
 
 def build_checkpointer_from_env():
     load_dotenv()
-    db_url = os.getenv("DATABASE_URL")
+    db_url = os.getenv("CHECKPOINT_DB_URL")
     if not db_url:
         return None
     if db_url.startswith("sqlite"):

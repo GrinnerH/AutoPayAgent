@@ -98,21 +98,24 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     model_name = os.getenv("MODEL_NAME")
-    base_url = os.getenv("OPENAI_BASE_URL", "https://api.deepseek.com/v1")
+    base_url = os.getenv("BASE_URL") or os.getenv("OPENAI_BASE_URL", "https://api.deepseek.com/v1")
     if not api_key or not model_name:
         return None
 
-    os.environ.setdefault("OPENAI_API_KEY", api_key)
-    os.environ.setdefault("OPENAI_BASE_URL", base_url)
-
-    model = init_chat_model(_normalize_model_name(model_name), temperature=0)
+    model = init_chat_model(
+        _normalize_model_name(model_name),
+        temperature=0,
+        base_url=base_url,
+        api_key=api_key,
+    )
 
     intent_agent = create_agent(
         model=model,
         tools=[list_services, find_services],
         system_prompt=(
             "You are an intent extraction agent. "
-            "Extract structured intent for paid API tasks. "
+            "Decide if the task needs a paid external API. "
+            "For general knowledge Q&A or summarization, set is_payment_task=false. "
             "Include a service_query suitable for service discovery."
         ),
         response_format=ToolStrategy(IntentOutput),
@@ -123,7 +126,8 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
         tools=[list_services, find_services],
         system_prompt=(
             "You are a service selection agent. "
-            "Use tools to find candidate services and pick the best match."
+            "Use tools to find candidate services and pick the best match. "
+            "Prefer free services when they satisfy the task."
         ),
         response_format=ToolStrategy(ServiceSelectionOutput),
     )

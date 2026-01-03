@@ -5,7 +5,7 @@ from nodes import (
     header_parser,
     human_approver,
     intent_router,
-    non_payment_responder,
+    normal_chat,
     payment_signer,
     payment_negotiator,
     request_executor,
@@ -36,7 +36,7 @@ def route_after_request(state: AgentState) -> str:
 def route_after_intent(state: AgentState) -> str:
     intent = state.get("intent") or {}
     if intent.get("is_payment_task") is False:
-        return "non_payment_responder"
+        return "normal_chat"
     return "service_registry"
 
 
@@ -86,7 +86,7 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
     builder = StateGraph(AgentState)
     builder.add_node("intent_router", intent_router)
     builder.add_node("service_registry", service_registry)
-    builder.add_node("non_payment_responder", non_payment_responder)
+    builder.add_node("normal_chat", normal_chat)
     builder.add_node("request_executor", request_executor)
     builder.add_node("header_parser", header_parser)
     builder.add_node("payment_negotiator", payment_negotiator)
@@ -99,7 +99,7 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
 
     builder.set_entry_point("intent_router")
     builder.add_conditional_edges("intent_router", route_after_intent)
-    builder.add_edge("non_payment_responder", END)
+    builder.add_edge("normal_chat", END)
     builder.add_edge("service_registry", "request_executor")
     builder.add_conditional_edges("request_executor", route_after_request)
     builder.add_edge("header_parser", "payment_negotiator")

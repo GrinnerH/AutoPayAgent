@@ -30,13 +30,17 @@ def intent_router(state: AgentState) -> AgentState:
     updates: Dict[str, Any] = {}
     if task_text:
         llm = state.get("llm_client")
-        if llm:
-            history = list(state.get("messages", []))
-            result, messages = llm.intent(history, task_text, state.get("thread_id"))
-            updates["intent"] = result.model_dump()
-            updates["messages"] = messages
-        else:
-            updates["intent"] = basic_intent_from_task(task_text)
+        if not llm:
+            updates["intent"] = {"is_payment_task": False, "service_type": "none", "service_query": ""}
+            updates["payment_ctx"] = {"status": "failed", "error_type": "llm_required"}
+            updates["audit_log"] = [
+                {"event": "intent", "error": "llm_required", "timestamp": int(time.time())}
+            ]
+            return updates
+        history = list(state.get("messages", []))
+        result, messages = llm.intent(history, task_text, state.get("thread_id"))
+        updates["intent"] = result.model_dump()
+        updates["messages"] = messages
     else:
         updates["intent"] = {
             "is_payment_task": True,
@@ -89,35 +93,46 @@ def service_registry(state: AgentState) -> AgentState:
 
     registry = state.get("service_candidates") or find_services(service_query, service_type)
     updates["service_candidates"] = registry
+    updates["audit_log"] = [
+        {
+            "event": "discovery",
+            "candidates": registry,
+            "timestamp": int(time.time()),
+        }
+    ]
     selected = None
 
     llm = state.get("llm_client")
-    if llm:
-        history = list(state.get("messages", []))
-        payload = {
-            "service_query": service_query,
-            "service_type": service_type,
-            "candidates": registry,
+    if not llm:
+        return {
+            "payment_ctx": {"status": "failed", "error_type": "llm_required"},
+            "audit_log": [{"event": "service_select", "error": "llm_required", "timestamp": int(time.time())}],
         }
-        result, messages = llm.select_service(history, payload, state.get("thread_id"))
-        updates["messages"] = messages
-        index = result.selected_index
-        if isinstance(index, int) and 0 <= index < len(registry):
-            selected = registry[index]
-        elif result.service_name:
-            for svc in registry:
-                if str(svc.get("name", "")).lower() == result.service_name.lower():
-                    selected = svc
-                    break
-        updates["audit_log"] = [
-            {
-                "event": "service_select",
-                "selected_index": result.selected_index,
-                "service_name": result.service_name,
-                "reason": result.reason,
-                "timestamp": int(time.time()),
-            }
-        ]
+    history = list(state.get("messages", []))
+    payload = {
+        "service_query": service_query,
+        "service_type": service_type,
+        "candidates": registry,
+    }
+    result, messages = llm.select_service(history, payload, state.get("thread_id"))
+    updates["messages"] = messages
+    index = result.selected_index
+    if isinstance(index, int) and 0 <= index < len(registry):
+        selected = registry[index]
+    elif result.service_name:
+        for svc in registry:
+            if str(svc.get("name", "")).lower() == result.service_name.lower():
+                selected = svc
+                break
+    updates["audit_log"] = [
+        {
+            "event": "service_select",
+            "selected_index": result.selected_index,
+            "service_name": result.service_name,
+            "reason": result.reason,
+            "timestamp": int(time.time()),
+        }
+    ]
 
     if not selected:
         selected = registry[0] if registry else None
@@ -261,34 +276,36 @@ def payment_negotiator(state: AgentState) -> AgentState:
     updates: Dict[str, Any] = {}
     requirements = ctx.get("requirements") or {}
     llm = state.get("llm_client")
-    selected = None
-    if llm:
-        accepts = requirements.get("accepts", [])
-        payload = {
-            "accepts": accepts,
-            "preferences": state.get("payment_preferences", {}),
-            "wallet_balance": state.get("wallet_balance", 0.0),
-            "risk_flags": state.get("risk_flags", {}),
+    if not llm:
+        return {
+            "payment_ctx": {"status": "failed", "error_type": "llm_required"},
+            "audit_log": [{"event": "negotiation", "error": "llm_required", "timestamp": int(time.time())}],
         }
-        history = list(state.get("messages", []))
-        os.environ["MOCK_WALLET_BALANCE"] = str(state.get("wallet_balance", 0.0))
-        result, messages = llm.negotiate(history, payload, state.get("thread_id"))
-        index = result.selected_index
-        if isinstance(index, int) and 0 <= index < len(accepts):
-            selected = accepts[index]
-            updates["policy_decision"] = result.policy_decision
-            updates["negotiation_result"] = {
-                "selected_index": index,
-                "reason": result.reason,
-            }
-        updates["messages"] = messages
+    selected = None
+    accepts = requirements.get("accepts", [])
+    payload = {
+        "accepts": accepts,
+        "preferences": state.get("payment_preferences", {}),
+        "wallet_balance": state.get("wallet_balance", 0.0),
+        "risk_flags": state.get("risk_flags", {}),
+    }
+    history = list(state.get("messages", []))
+    os.environ["MOCK_WALLET_BALANCE"] = str(state.get("wallet_balance", 0.0))
+    result, messages = llm.negotiate(history, payload, state.get("thread_id"))
+    index = result.selected_index
+    if isinstance(index, int) and 0 <= index < len(accepts):
+        selected = accepts[index]
+        updates["policy_decision"] = result.policy_decision
+        updates["negotiation_result"] = {
+            "selected_index": index,
+            "reason": result.reason,
+        }
+    updates["messages"] = messages
     if selected is None:
-        accepts = requirements.get("accepts", [])
-        ranked = score_accepts(accepts, state.get("payment_preferences", {})) if accepts else []
-        if ranked:
-            selected = accepts[ranked[0]]
-        else:
-            selected = select_accept(requirements, state.get("payment_preferences", {}))
+        return {
+            "payment_ctx": {"status": "failed", "error_type": "no_accepts"},
+            "audit_log": [{"event": "negotiation", "error": "no_accepts", "timestamp": int(time.time())}],
+        }
     if not selected:
         updates["payment_ctx"] = {"status": "failed", "error_type": "no_accepts"}
         return updates
@@ -432,31 +449,28 @@ def reflection_rewriter(state: AgentState) -> AgentState:
     updates: Dict[str, Any] = {}
     error_type = ctx.get("error_type")
     llm = state.get("llm_client")
-    if llm:
-        history = list(state.get("messages", []))
-        payload = {
+    if not llm:
+        return {
+            "payment_ctx": {"status": "failed", "error_type": "llm_required"},
+            "audit_log": [{"event": "reflection", "error": "llm_required", "timestamp": int(time.time())}],
+        }
+    history = list(state.get("messages", []))
+    payload = {
+        "error_type": error_type,
+        "retry_count": ctx.get("retry_count"),
+        "last_http_status": ctx.get("last_http_status"),
+    }
+    result, messages = llm.reflect(
+        history,
+        {
             "error_type": error_type,
             "retry_count": ctx.get("retry_count"),
             "last_http_status": ctx.get("last_http_status"),
-        }
-        result, messages = llm.reflect(
-            history,
-            {
-                "error_type": error_type,
-                "retry_count": ctx.get("retry_count"),
-                "last_http_status": ctx.get("last_http_status"),
-            },
-            state.get("thread_id"),
-        )
-        notes = result.model_dump()
-        updates["messages"] = messages
-    else:
-        if error_type in {"payment_verification_failed", "payment_loop"}:
-            notes = {"action": "reselect_accept", "reason": error_type}
-        elif error_type in {"network_error", "http_server_error"}:
-            notes = {"action": "retry_request", "reason": error_type}
-        else:
-            notes = {"action": "abort", "reason": error_type}
+        },
+        state.get("thread_id"),
+    )
+    notes = result.model_dump()
+    updates["messages"] = messages
     if notes.get("action") == "reselect_accept":
         updates["payment_ctx"] = {"selected_accept": None}
     if notes.get("action") == "retry_request":
@@ -622,13 +636,13 @@ def error_handler(state: AgentState) -> AgentState:
     return updates
 
 
-def non_payment_responder(state: AgentState) -> AgentState:
+def normal_chat(state: AgentState) -> AgentState:
     task_text = state.get("task_text") or ""
     return {
         "messages": [AIMessage(content=f"No payment required for task: {task_text}")],
         "audit_log": [
             {
-                "event": "non_payment",
+                "event": "normal_chat",
                 "timestamp": int(time.time()),
             }
         ],

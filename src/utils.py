@@ -240,6 +240,14 @@ def score_accepts(accepts: List[Dict[str, object]], preferences: Dict[str, objec
 
 def basic_intent_from_task(task_text: str) -> Dict[str, Any]:
     text = task_text.lower()
+    if any(term in text for term in ["闲聊", "普通问题", "聊天", "general chat", "small talk"]):
+        return {
+            "is_payment_task": False,
+            "service_type": "none",
+            "service_query": "",
+            "query_params": {},
+            "constraints": {},
+        }
     if "price" in text or "价格" in text:
         service_type = "market_price"
     elif "report" in text or "报告" in text:
@@ -257,6 +265,28 @@ def basic_intent_from_task(task_text: str) -> Dict[str, Any]:
 
 def default_service_registry() -> List[Dict[str, Any]]:
     return [
+        {
+            "name": "Mock Free Info",
+            "service_type": "generic_query",
+            "url": "http://127.0.0.1:18080/api/free",
+            "http_method": "GET",
+            "supports_x402": False,
+            "reputation": "ok",
+            "whitelist_tag": True,
+            "headers": {},
+            "body": None,
+        },
+        {
+            "name": "Mock Weather Free",
+            "service_type": "weather",
+            "url": "http://127.0.0.1:18080/api/weather-free",
+            "http_method": "GET",
+            "supports_x402": False,
+            "reputation": "ok",
+            "whitelist_tag": True,
+            "headers": {},
+            "body": None,
+        },
         {
             "name": "Mock Weather Pro",
             "service_type": "weather",

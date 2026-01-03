@@ -26,6 +26,7 @@ class ServiceConfig:
     chain_id: int = 8453
     token_address: str = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
     fail_first: bool = False
+    free: bool = False
 
 
 class X402MockHandler(BaseHTTPRequestHandler):
@@ -44,6 +45,11 @@ class X402MockHandler(BaseHTTPRequestHandler):
 
         if self.path != cfg.path:
             self._send(404, body=b"not found")
+            return
+
+        if cfg.free:
+            body = json.dumps({"result": "ok", "service": cfg.name, "paid": False}).encode("utf-8")
+            self._send(200, headers={"Content-Type": "application/json"}, body=body)
             return
 
         requirements = self._requirements(cfg)
