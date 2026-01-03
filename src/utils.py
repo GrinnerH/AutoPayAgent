@@ -115,6 +115,37 @@ class AgentKitWalletProvider(WalletProvider):
         raise RuntimeError("Wallet provider does not support typed data signing")
 
 
+@dataclass
+class EthAccountWalletProvider(WalletProvider):
+    private_key: str
+
+    @classmethod
+    def from_env(cls) -> "EthAccountWalletProvider":
+        import os
+        key = os.getenv("ETH_PRIVATE_KEY", "")
+        if not key:
+            from eth_account import Account
+            key = Account.create().key.hex()
+        return cls(private_key=key)
+
+    def get_address(self) -> str:
+        from eth_account import Account
+        return Account.from_key(self.private_key).address
+
+    def sign_typed_data(self, domain: Dict[str, Any], types: Dict[str, Any], message: Dict[str, Any]) -> str:
+        from eth_account import Account
+        from eth_account.messages import encode_structured_data
+        data = {
+            "types": types,
+            "primaryType": "TransferWithAuthorization",
+            "domain": domain,
+            "message": message,
+        }
+        signable = encode_structured_data(data)
+        signed = Account.sign_message(signable, private_key=self.private_key)
+        return signed.signature.hex()
+
+
 def safe_base64_json(raw: str) -> Dict[str, Any]:
     padded = raw + "=" * (-len(raw) % 4)
     decoded = base64.b64decode(padded).decode("utf-8")

@@ -1,14 +1,17 @@
 import os
+import threading
 import time
 
+import uvicorn
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
 
 from config import AgentConfig
+from facilitator_server import app as facilitator_app
 from graph import build_graph
 from llm import build_llm_bundle_from_env
 from mock_server import ServiceConfig, start_server
-from utils import DummyWalletProvider, default_state
+from utils import EthAccountWalletProvider, default_state
 
 
 def _invoke_with_interrupts(graph, state, thread_id: str, auto_approve: bool):
@@ -20,6 +23,16 @@ def _invoke_with_interrupts(graph, state, thread_id: str, auto_approve: bool):
 
 
 def run_demo() -> None:
+    facilitator_host = os.getenv("FACILITATOR_HOST", "127.0.0.1")
+    facilitator_port = int(os.getenv("FACILITATOR_PORT", "9000"))
+    facilitator_thread = threading.Thread(
+        target=uvicorn.run,
+        kwargs={"app": facilitator_app, "host": facilitator_host, "port": facilitator_port, "log_level": "warning"},
+        daemon=True,
+    )
+    facilitator_thread.start()
+    os.environ.setdefault("FACILITATOR_URL", f"http://{facilitator_host}:{facilitator_port}")
+
     weather_server = start_server(
         ServiceConfig(
             name="Mock Weather Pro",
@@ -55,7 +68,7 @@ def run_demo() -> None:
     time.sleep(0.2)
 
     config = AgentConfig(budget_limit=5.0, auto_approve_threshold=1.0, enable_llm=False, enable_checkpoint=True)
-    wallet = DummyWalletProvider()
+    wallet = EthAccountWalletProvider.from_env()
     checkpointer = InMemorySaver()
     graph = build_graph(wallet, checkpointer=checkpointer)
 

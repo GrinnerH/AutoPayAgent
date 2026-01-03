@@ -1,9 +1,12 @@
 import base64
 import json
+import os
 import threading
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional
+
+import httpx
 
 
 def _encode(obj: Any) -> str:
@@ -43,19 +46,55 @@ class X402MockHandler(BaseHTTPRequestHandler):
             self._send(404, body=b"not found")
             return
 
+        requirements = self._requirements(cfg)
         signature = self.headers.get("PAYMENT-SIGNATURE")
         if not signature:
-            self._send(402, headers={"PAYMENT-REQUIRED": _encode(self._requirements(cfg))}, body=b"payment required")
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements)}, body=b"payment required")
+            return
+
+        try:
+            payload = json.loads(base64.b64decode(signature.encode("utf-8")).decode("utf-8"))
+        except (ValueError, json.JSONDecodeError):
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "bad_signature"})
             return
 
         if cfg.fail_first and not self.server.fail_used:  # type: ignore[attr-defined]
             self.server.fail_used = True  # type: ignore[attr-defined]
-            self._send(402, headers={"PAYMENT-REQUIRED": _encode(self._requirements(cfg)), "X-REASON": "verification_failed"})
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "verification_failed"})
             return
 
-        receipt = {"txHash": "0xmocktxhash", "network": cfg.network, "asset": cfg.asset}
-        payload = json.dumps({"result": "ok", "service": cfg.name}).encode("utf-8")
-        self._send(200, headers={"PAYMENT-RESPONSE": _encode(receipt)}, body=payload)
+        facilitator = os.getenv("FACILITATOR_URL", "http://127.0.0.1:9000")
+        try:
+            verify_resp = httpx.post(
+                f"{facilitator}/verify",
+                json={"paymentRequirements": requirements, "paymentPayload": payload},
+                timeout=5.0,
+            )
+            verify_resp.raise_for_status()
+        except httpx.HTTPError:
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "facilitator_unreachable"})
+            return
+
+        verify_data = verify_resp.json()
+        if not verify_data.get("isValid"):
+            reason = verify_data.get("reason", "verification_failed")
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": reason})
+            return
+
+        settle_resp = httpx.post(
+            f"{facilitator}/settle",
+            json={"verifiedPayment": verify_data.get("normalized", {})},
+            timeout=5.0,
+        )
+        try:
+            settle_resp.raise_for_status()
+        except httpx.HTTPError:
+            self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "settle_failed"})
+            return
+
+        receipt = settle_resp.json().get("receipt") or {"txHash": "0xmocktxhash"}
+        body = json.dumps({"result": "ok", "service": cfg.name}).encode("utf-8")
+        self._send(200, headers={"PAYMENT-RESPONSE": _encode(receipt)}, body=body)
 
     def _requirements(self, cfg: ServiceConfig) -> Dict[str, Any]:
         amount = int(cfg.amount_usdc * 1_000_000)

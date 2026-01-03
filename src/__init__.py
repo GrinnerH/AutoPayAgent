@@ -1,6 +1,6 @@
 from .config import AgentConfig
 from .graph import build_graph
-from .utils import AgentKitWalletProvider, DummyWalletProvider, WalletProvider, default_state
+from .utils import AgentKitWalletProvider, DummyWalletProvider, EthAccountWalletProvider, WalletProvider, default_state
 from .workflow import build_wallet_provider_from_config, run_with_config, run_workflow
 
 __all__ = [
@@ -13,4 +13,5 @@ __all__ = [
     "WalletProvider",
     "DummyWalletProvider",
     "AgentKitWalletProvider",
+    "EthAccountWalletProvider",
 ]

@@ -536,6 +536,12 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
         "verifyingContract": selected.get("token_address", "0x0000000000000000000000000000000000000000"),
     }
     types = {
+        "EIP712Domain": [
+            {"name": "name", "type": "string"},
+            {"name": "version", "type": "string"},
+            {"name": "chainId", "type": "uint256"},
+            {"name": "verifyingContract", "type": "address"},
+        ],
         "TransferWithAuthorization": [
             {"name": "from", "type": "address"},
             {"name": "to", "type": "address"},
@@ -543,7 +549,7 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
             {"name": "validAfter", "type": "uint256"},
             {"name": "validBefore", "type": "uint256"},
             {"name": "nonce", "type": "bytes32"},
-        ]
+        ],
     }
     authorization = {
         "from": wallet_provider.get_address(),
@@ -559,7 +565,13 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
         "x402Version": "1.0",
         "scheme": "exact",
         "network": selected.get("network"),
-        "payload": {"signature": signature, "authorization": authorization},
+        "payload": {
+            "signature": signature,
+            "authorization": authorization,
+            "domain": domain,
+            "types": types,
+            "asset": selected.get("asset"),
+        },
     }
 
     encoded = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8")
