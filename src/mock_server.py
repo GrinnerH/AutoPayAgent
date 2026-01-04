@@ -78,12 +78,16 @@ class X402MockHandler(BaseHTTPRequestHandler):
             )
             verify_resp.raise_for_status()
         except httpx.HTTPError:
+            if os.getenv("DEMO_DEBUG") == "1":
+                print("mock_server verify failed: facilitator_unreachable", flush=True)
             self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "facilitator_unreachable"})
             return
 
         verify_data = verify_resp.json()
         if not verify_data.get("isValid"):
             reason = verify_data.get("reason", "verification_failed")
+            if os.getenv("DEMO_DEBUG") == "1":
+                print(f"mock_server verify failed: {reason}", flush=True)
             self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": reason})
             return
 
@@ -95,6 +99,8 @@ class X402MockHandler(BaseHTTPRequestHandler):
         try:
             settle_resp.raise_for_status()
         except httpx.HTTPError:
+            if os.getenv("DEMO_DEBUG") == "1":
+                print("mock_server settle failed", flush=True)
             self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "settle_failed"})
             return
 

@@ -1,0 +1,199 @@
+{
+  "status": "success",
+  "error_type": null,
+  "audit_log": [
+    {
+      "event": "llm_intent",
+      "input": {
+        "task_text": "查询新加坡天气"
+      },
+      "output": {
+        "structured_response": {
+          "is_payment_task": false,
+          "service_type": "weather",
+          "service_query": "新加坡天气查询",
+          "query_params": {
+            "location": "新加坡",
+            "language": "zh"
+          },
+          "constraints": {}
+        },
+        "messages": [
+          {
+            "type": "human",
+            "content": "查询新加坡天气",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=False service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={}",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767491158
+    },
+    {
+      "event": "intent",
+      "intent": {
+        "is_payment_task": false,
+        "service_type": "weather",
+        "service_query": "新加坡天气查询",
+        "query_params": {
+          "location": "新加坡",
+          "language": "zh"
+        },
+        "constraints": {}
+      },
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false
+      },
+      "timestamp": 1767491158
+    },
+    {
+      "event": "llm_chat",
+      "input": {
+        "task_text": "查询新加坡天气"
+      },
+      "output": {
+        "structured_response": {
+          "response": "我已经识别到您要查询新加坡的天气信息。这是一个天气查询服务请求，具体参数为：位置-新加坡，语言-中文。\n\n不过，我目前无法直接获取实时的天气数据。建议您可以通过以下方式查询新加坡的天气：\n\n1. 使用天气应用程序或网站\n2. 查看新加坡气象局的官方网站\n3. 使用搜索引擎搜索\"新加坡天气\"\n\n如果您需要其他帮助，请告诉我！"
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=False service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "查询新加坡天气",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: response='我已经识别到您要查询新加坡的天气信息。这是一个天气查询服务请求，具体参数为：位置-新加坡，语言-中文。\\n\\n不过，我目前无法直接获取实时的天气数据。建议您可以通过以下方式查询新加坡的天气：\\n\\n1. 使用天气应用程序或网站\\n2. 查看新加坡气象局的官方网站\\n3. 使用搜索引擎搜索\"新加坡天气\"\\n\\n如果您需要其他帮助，请告诉我！'",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767491163
+    },
+    {
+      "event": "normal_chat",
+      "response": "我已经识别到您要查询新加坡的天气信息。这是一个天气查询服务请求，具体参数为：位置-新加坡，语言-中文。\n\n不过，我目前无法直接获取实时的天气数据。建议您可以通过以下方式查询新加坡的天气：\n\n1. 使用天气应用程序或网站\n2. 查看新加坡气象局的官方网站\n3. 使用搜索引擎搜索\"新加坡天气\"\n\n如果您需要其他帮助，请告诉我！",
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false
+      },
+      "timestamp": 1767491163
+    }
+  ],
+  "intent": {
+    "is_payment_task": false,
+    "service_type": "weather",
+    "service_query": "新加坡天气查询",
+    "query_params": {
+      "location": "新加坡",
+      "language": "zh"
+    },
+    "constraints": {}
+  },
+  "selected_service": null,
+  "policy": {
+    "whitelist_domains": [],
+    "whitelist_services": [],
+    "auto_pay_threshold": 1.0,
+    "hitl_threshold": 1.0,
+    "hard_limit": 10.0,
+    "daily_budget": 5.0,
+    "payee_blacklist": []
+  },
+  "payment_ctx": {
+    "target_url": null,
+    "http_method": "GET",
+    "request_headers": {},
+    "request_body": null,
+    "status": "success",
+    "requirements": null,
+    "requirements_raw": null,
+    "selected_accept": null,
+    "signed_payload": null,
+    "amount_usdc": 0.0,
+    "tx_hash": null,
+    "last_http_status": null,
+    "last_response_headers": null,
+    "last_response_text": null,
+    "error_type": null,
+    "error_msg": null,
+    "retry_count": 0,
+    "network_retry_count": 0,
+    "max_payment_retries": 3,
+    "max_network_retries": 3
+  },
+  "messages": [
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: is_payment_task=False service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={}",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: response='我已经识别到您要查询新加坡的天气信息。这是一个天气查询服务请求，具体参数为：位置-新加坡，语言-中文。\\n\\n不过，我目前无法直接获取实时的天气数据。建议您可以通过以下方式查询新加坡的天气：\\n\\n1. 使用天气应用程序或网站\\n2. 查看新加坡气象局的官方网站\\n3. 使用搜索引擎搜索\"新加坡天气\"\\n\\n如果您需要其他帮助，请告诉我！'",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "我已经识别到您要查询新加坡的天气信息。这是一个天气查询服务请求，具体参数为：位置-新加坡，语言-中文。\n\n不过，我目前无法直接获取实时的天气数据。建议您可以通过以下方式查询新加坡的天气：\n\n1. 使用天气应用程序或网站\n2. 查看新加坡气象局的官方网站\n3. 使用搜索引擎搜索\"新加坡天气\"\n\n如果您需要其他帮助，请告诉我！",
+      "additional_kwargs": {}
+    }
+  ]
+}

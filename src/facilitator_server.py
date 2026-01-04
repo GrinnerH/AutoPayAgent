@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from eth_account import Account
-from eth_account.messages import encode_structured_data
+from eth_account.messages import encode_typed_data
 
 
 app = FastAPI()
@@ -72,7 +72,7 @@ def _verify_signature(payload: Dict[str, Any]) -> str:
         "domain": domain,
         "message": authorization,
     }
-    signable = encode_structured_data(data)
+    signable = encode_typed_data(full_message=data)
     return Account.recover_message(signable, signature=signature)
 
 

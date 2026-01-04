@@ -134,14 +134,14 @@ class EthAccountWalletProvider(WalletProvider):
 
     def sign_typed_data(self, domain: Dict[str, Any], types: Dict[str, Any], message: Dict[str, Any]) -> str:
         from eth_account import Account
-        from eth_account.messages import encode_structured_data
+        from eth_account.messages import encode_typed_data
         data = {
             "types": types,
             "primaryType": "TransferWithAuthorization",
             "domain": domain,
             "message": message,
         }
-        signable = encode_structured_data(data)
+        signable = encode_typed_data(full_message=data)
         signed = Account.sign_message(signable, private_key=self.private_key)
         return signed.signature.hex()
 
@@ -268,11 +268,12 @@ def default_service_registry() -> List[Dict[str, Any]]:
         {
             "name": "Mock Free Info",
             "service_type": "generic_query",
-            "url": "http://127.0.0.1:18080/api/free",
+            "url": "http://127.0.0.1:18079/api/free",
             "http_method": "GET",
             "supports_x402": False,
             "reputation": "ok",
             "whitelist_tag": True,
+            "supports_retry": False,
             "headers": {},
             "body": None,
         },
@@ -284,6 +285,7 @@ def default_service_registry() -> List[Dict[str, Any]]:
             "supports_x402": False,
             "reputation": "ok",
             "whitelist_tag": True,
+            "supports_retry": False,
             "headers": {},
             "body": None,
         },
@@ -295,6 +297,7 @@ def default_service_registry() -> List[Dict[str, Any]]:
             "supports_x402": True,
             "reputation": "ok",
             "whitelist_tag": True,
+            "supports_retry": False,
             "headers": {},
             "body": None,
         },
@@ -306,6 +309,19 @@ def default_service_registry() -> List[Dict[str, Any]]:
             "supports_x402": True,
             "reputation": "ok",
             "whitelist_tag": False,
+            "supports_retry": False,
+            "headers": {},
+            "body": None,
+        },
+        {
+            "name": "Mock Market Intel Retry",
+            "service_type": "market_report_retry",
+            "url": "http://127.0.0.1:18083/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": True,
+            "reputation": "ok",
+            "whitelist_tag": False,
+            "supports_retry": True,
             "headers": {},
             "body": None,
         },

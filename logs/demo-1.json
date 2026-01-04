@@ -1,0 +1,22 @@
+{
+  "status": "success",
+  "error_type": null,
+  "audit_log": [
+    {
+      "event": "intent",
+      "intent": {
+        "is_payment_task": false,
+        "service_type": "text_summarization",
+        "service_query": "",
+        "query_params": {},
+        "constraints": {}
+      },
+      "timestamp": 1767490585
+    },
+    {
+      "event": "normal_chat",
+      "response": "您希望我概括这段关于区块链的入门介绍文字。不过，您只提供了文字的主题描述，没有提供具体的文字内容。请提供您想要概括的具体文字内容，这样我才能为您进行准确的概括。",
+      "timestamp": 1767490589
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "error": "TypeError",
+  "message": "Type is not msgpack serializable: AgentBundle"
+}

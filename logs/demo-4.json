@@ -1,0 +1,67 @@
+{
+  "status": "success",
+  "error_type": null,
+  "audit_log": [
+    {
+      "event": "intent",
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "market_report",
+        "service_query": "深度研究报告 市场分析报告 付费研究报告",
+        "query_params": {
+          "report_type": "深度研究报告",
+          "cost": "5 USDC"
+        },
+        "constraints": {
+          "paid_required": true,
+          "cost": "5 USDC"
+        }
+      },
+      "timestamp": 1767490513
+    },
+    {
+      "event": "service_select",
+      "selected_index": 0,
+      "service_name": "Mock Market Intel",
+      "reason": "Mock Market Intel 是唯一可用的市场研究报告服务，支持x402支付，符合用户需要付费5 USDC获取深度研究报告的需求。该服务提供市场分析报告，虽然声誉为\"ok\"，但能满足用户的基本要求。",
+      "timestamp": 1767490519
+    },
+    {
+      "event": "payment_required",
+      "reason": null,
+      "retry_count": 0,
+      "timestamp": 1767490519
+    },
+    {
+      "event": "negotiation",
+      "result": {
+        "selected": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "reason": "preference_match",
+        "amount_usdc": 5.0
+      },
+      "policy_decision": "auto",
+      "timestamp": 1767490527
+    },
+    {
+      "event": "hitl",
+      "decision": "approve",
+      "timestamp": 1767490527
+    },
+    {
+      "amount_usdc": 5.0,
+      "payee": "0x2222222222222222222222222222222222222222",
+      "network": "base",
+      "tx_hash": "0xfd2e8dbf543bf3fa19256b832834e129a7b5005a0cf68f079cb1579b3f82b17f",
+      "timestamp": 1767490527
+    }
+  ]
+}

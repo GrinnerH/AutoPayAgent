@@ -4,11 +4,11 @@ from dataclasses import asdict
 from typing import Optional
 
 from dotenv import load_dotenv
-from config import AgentConfig
-from graph import build_graph
-from utils import AgentKitWalletProvider, AgentState, WalletProvider, default_state
+from src.config import AgentConfig
+from src.graph import build_graph
+from src.utils import AgentKitWalletProvider, AgentState, WalletProvider, default_state
 from langgraph.checkpoint.memory import InMemorySaver
-from llm import build_llm_bundle_from_env
+from src.llm import build_llm_bundle_from_env
 
 
 def run_workflow(state: AgentState, wallet_provider: WalletProvider, checkpointer=None) -> AgentState:

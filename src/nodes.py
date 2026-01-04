@@ -9,7 +9,7 @@ import httpx
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.types import interrupt
 
-from utils import (
+from src.utils import (
     AgentState,
     WalletProvider,
     basic_intent_from_task,
@@ -22,14 +22,61 @@ from utils import (
     score_accepts,
     select_accept,
 )
-from tools import find_services
+from src.tools import find_services
+
+_LLM_BUNDLE = None
+
+
+def set_llm_bundle(bundle) -> None:
+    global _LLM_BUNDLE
+    _LLM_BUNDLE = bundle
+
+
+def _get_llm(state: AgentState):
+    return state.get("llm_client") or _LLM_BUNDLE
+
+
+def _debug(message: str) -> None:
+    if os.getenv("DEMO_DEBUG") == "1":
+        print(message, flush=True)
+
+
+def _serialize_messages(messages: list) -> list:
+    serialized = []
+    for message in messages:
+        try:
+            msg_type = getattr(message, "type", message.__class__.__name__)
+            serialized.append(
+                {
+                    "type": msg_type,
+                    "content": getattr(message, "content", str(message)),
+                    "additional_kwargs": getattr(message, "additional_kwargs", {}),
+                }
+            )
+        except Exception:
+            serialized.append({"type": "unknown", "content": str(message), "additional_kwargs": {}})
+    return serialized
+
+
+def _state_snapshot(state: AgentState) -> Dict[str, Any]:
+    ctx = state.get("payment_ctx", {})
+    return {
+        "status": ctx.get("status"),
+        "error_type": ctx.get("error_type"),
+        "retry_count": ctx.get("retry_count"),
+        "amount_usdc": ctx.get("amount_usdc"),
+        "target_url": ctx.get("target_url"),
+        "selected_accept": ctx.get("selected_accept"),
+        "policy_decision": state.get("policy_decision"),
+        "human_approval_required": state.get("human_approval_required"),
+    }
 
 
 def intent_router(state: AgentState) -> AgentState:
     task_text = state.get("task_text")
     updates: Dict[str, Any] = {}
     if task_text:
-        llm = state.get("llm_client")
+        llm = _get_llm(state)
         if not llm:
             updates["intent"] = {"is_payment_task": False, "service_type": "none", "service_query": ""}
             updates["payment_ctx"] = {"status": "failed", "error_type": "llm_required"}
@@ -37,10 +84,23 @@ def intent_router(state: AgentState) -> AgentState:
                 {"event": "intent", "error": "llm_required", "timestamp": int(time.time())}
             ]
             return updates
+        _debug("intent_router: invoking LLM")
         history = list(state.get("messages", []))
-        result, messages = llm.intent(history, task_text, state.get("thread_id"))
+        result, messages, raw_result = llm.intent(history, task_text, state.get("thread_id"))
+        _debug("intent_router: LLM done")
         updates["intent"] = result.model_dump()
         updates["messages"] = messages
+        updates["audit_log"] = [
+            {
+                "event": "llm_intent",
+                "input": {"task_text": task_text},
+                "output": {
+                    "structured_response": result.model_dump(),
+                    "messages": _serialize_messages(raw_result.get("messages", [])),
+                },
+                "timestamp": int(time.time()),
+            }
+        ]
     else:
         updates["intent"] = {
             "is_payment_task": True,
@@ -49,10 +109,12 @@ def intent_router(state: AgentState) -> AgentState:
             "query_params": {},
             "constraints": {},
         }
-    updates["audit_log"] = [
+    updates.setdefault("audit_log", [])
+    updates["audit_log"] += [
         {
             "event": "intent",
             "intent": updates.get("intent"),
+            "state": _state_snapshot(state),
             "timestamp": int(time.time()),
         }
     ]
@@ -61,7 +123,16 @@ def intent_router(state: AgentState) -> AgentState:
 
 def service_registry(state: AgentState) -> AgentState:
     if state.get("selected_service"):
-        return {}
+        return {
+            "audit_log": [
+                {
+                    "event": "service_registry",
+                    "skipped": True,
+                    "state": _state_snapshot(state),
+                    "timestamp": int(time.time()),
+                }
+            ]
+        }
     updates: Dict[str, Any] = {}
     ctx = state.get("payment_ctx", {})
 
@@ -85,24 +156,41 @@ def service_registry(state: AgentState) -> AgentState:
             "service_name": selected.get("name", ""),
         }
         updates["payment_ctx"] = {"status": "probing"}
+        updates["audit_log"] = [
+            {
+                "event": "service_registry",
+                "selected_service": selected,
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ]
         return updates
 
     intent = state.get("intent") or {}
     service_query = intent.get("service_query") or ""
     service_type = intent.get("service_type") or ""
+    constraints = intent.get("constraints") or {}
 
-    registry = state.get("service_candidates") or find_services(service_query, service_type)
+    _debug("service_registry: finding services")
+    registry = state.get("service_candidates") or find_services.invoke(
+        {"query": service_query, "service_type": service_type}
+    )
+    if constraints.get("paid_required") is True:
+        registry = [svc for svc in registry if svc.get("supports_x402") is True]
+    if constraints.get("require_retry_service") is True:
+        registry = [svc for svc in registry if svc.get("supports_retry") is True]
     updates["service_candidates"] = registry
     updates["audit_log"] = [
         {
             "event": "discovery",
             "candidates": registry,
+            "intent": intent,
             "timestamp": int(time.time()),
         }
     ]
     selected = None
 
-    llm = state.get("llm_client")
+    llm = _get_llm(state)
     if not llm:
         return {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
@@ -114,7 +202,9 @@ def service_registry(state: AgentState) -> AgentState:
         "service_type": service_type,
         "candidates": registry,
     }
-    result, messages = llm.select_service(history, payload, state.get("thread_id"))
+    _debug("service_registry: selecting service with LLM")
+    result, messages, raw_result = llm.select_service(history, payload, state.get("thread_id"))
+    _debug("service_registry: LLM done")
     updates["messages"] = messages
     index = result.selected_index
     if isinstance(index, int) and 0 <= index < len(registry):
@@ -124,12 +214,22 @@ def service_registry(state: AgentState) -> AgentState:
             if str(svc.get("name", "")).lower() == result.service_name.lower():
                 selected = svc
                 break
-    updates["audit_log"] = [
+    updates["audit_log"] += [
+        {
+            "event": "llm_service_select",
+            "input": payload,
+            "output": {
+                "structured_response": result.model_dump(),
+                "messages": _serialize_messages(raw_result.get("messages", [])),
+            },
+            "timestamp": int(time.time()),
+        },
         {
             "event": "service_select",
             "selected_index": result.selected_index,
             "service_name": result.service_name,
             "reason": result.reason,
+            "state": _state_snapshot(state),
             "timestamp": int(time.time()),
         }
     ]
@@ -167,6 +267,7 @@ def service_registry(state: AgentState) -> AgentState:
 
 
 def request_executor(state: AgentState) -> AgentState:
+    _debug(f"request_executor: sending request to {state.get('payment_ctx', {}).get('target_url')}")
     ctx = state.get("payment_ctx", {})
     headers = dict(ctx.get("request_headers", {}))
     updates: Dict[str, Any] = {}
@@ -200,6 +301,15 @@ def request_executor(state: AgentState) -> AgentState:
             "error_type": "network_error",
             "error_msg": str(exc),
         }
+        updates["audit_log"] = [
+            {
+                "event": "request_executor",
+                "error": "network_error",
+                "error_msg": str(exc),
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ]
         return updates
 
     updates.setdefault("payment_ctx", {})
@@ -212,14 +322,19 @@ def request_executor(state: AgentState) -> AgentState:
     )
 
     if response.status_code == 200:
+        _debug("request_executor: got 200")
         updates["payment_ctx"].update(
             {"status": "success", "error_type": None, "error_msg": None}
         )
     elif response.status_code == 402:
+        _debug("request_executor: got 402")
         headers = dict(response.headers)
         required = get_header(headers, "PAYMENT-REQUIRED") or get_header(headers, "X-PAYMENT-REQUIRED")
+        reason = get_header(headers, "X-REASON")
+        if reason:
+            _debug(f"request_executor: 402 reason {reason}")
         updates["payment_ctx"].update(
-            {"status": "payment_required", "requirements_raw": required}
+            {"status": "payment_required", "requirements_raw": required, "error_msg": reason}
         )
         if ctx.get("signed_payload"):
             retry_count = int(ctx.get("retry_count", 0)) + 1
@@ -232,6 +347,16 @@ def request_executor(state: AgentState) -> AgentState:
                 updates["payment_ctx"]["error_type"] = "payment_verification_failed"
         else:
             updates["payment_ctx"]["error_type"] = None
+        updates.setdefault("audit_log", [])
+        updates["audit_log"] += [
+            {
+                "event": "payment_required",
+                "reason": reason,
+                "retry_count": updates["payment_ctx"].get("retry_count", 0),
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ]
     elif 500 <= response.status_code < 600:
         updates["payment_ctx"].update(
             {"status": "failed", "error_type": "http_server_error"}
@@ -245,10 +370,24 @@ def request_executor(state: AgentState) -> AgentState:
             {"status": "failed", "error_type": "http_unknown"}
         )
 
+    updates.setdefault("audit_log", [])
+    updates["audit_log"] += [
+        {
+            "event": "request_executor",
+            "status_code": response.status_code,
+            "url": ctx.get("target_url"),
+            "has_signature": bool(ctx.get("signed_payload")),
+            "error_type": updates["payment_ctx"].get("error_type"),
+            "error_msg": updates["payment_ctx"].get("error_msg"),
+            "state": _state_snapshot(state),
+            "timestamp": int(time.time()),
+        }
+    ]
     return updates
 
 
 def header_parser(state: AgentState) -> AgentState:
+    _debug("header_parser: parsing requirements")
     ctx = state.get("payment_ctx", {})
     raw = ctx.get("requirements_raw")
     if not raw:
@@ -268,14 +407,27 @@ def header_parser(state: AgentState) -> AgentState:
     accepts = requirements.get("accepts", [])
     if not accepts:
         return {"payment_ctx": {"status": "failed", "error_type": "no_accepts"}}
-    return {"payment_ctx": {"requirements": requirements, "status": "analyzing"}}
+    amount_usdc = extract_amount_usdc(accepts[0], requirements)
+    return {
+        "payment_ctx": {"requirements": requirements, "status": "analyzing", "amount_usdc": amount_usdc},
+        "audit_log": [
+            {
+                "event": "header_parser",
+                "accepts_count": len(accepts),
+                "amount_usdc": amount_usdc,
+                "requirements": requirements,
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ],
+    }
 
 
 def payment_negotiator(state: AgentState) -> AgentState:
     ctx = state.get("payment_ctx", {})
     updates: Dict[str, Any] = {}
     requirements = ctx.get("requirements") or {}
-    llm = state.get("llm_client")
+    llm = _get_llm(state)
     if not llm:
         return {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
@@ -289,9 +441,11 @@ def payment_negotiator(state: AgentState) -> AgentState:
         "wallet_balance": state.get("wallet_balance", 0.0),
         "risk_flags": state.get("risk_flags", {}),
     }
+    _debug("payment_negotiator: invoking LLM")
     history = list(state.get("messages", []))
     os.environ["MOCK_WALLET_BALANCE"] = str(state.get("wallet_balance", 0.0))
-    result, messages = llm.negotiate(history, payload, state.get("thread_id"))
+    result, messages, raw_result = llm.negotiate(history, payload, state.get("thread_id"))
+    _debug("payment_negotiator: LLM done")
     index = result.selected_index
     if isinstance(index, int) and 0 <= index < len(accepts):
         selected = accepts[index]
@@ -329,11 +483,21 @@ def payment_negotiator(state: AgentState) -> AgentState:
         updates["policy_decision"] = "pending"
     updates["audit_log"] = [
         {
+            "event": "llm_negotiation",
+            "input": payload,
+            "output": {
+                "structured_response": result.model_dump(),
+                "messages": _serialize_messages(raw_result.get("messages", [])),
+            },
+            "timestamp": int(time.time()),
+        },
+        {
             "event": "negotiation",
             "result": updates.get("negotiation_result") or state.get("negotiation_result"),
             "policy_decision": updates.get("policy_decision") or state.get("policy_decision"),
+            "state": _state_snapshot(state),
             "timestamp": int(time.time()),
-        }
+        },
     ]
     updates["payment_ctx"] = {
         "selected_accept": selected,
@@ -344,6 +508,7 @@ def payment_negotiator(state: AgentState) -> AgentState:
 
 
 def risk_assessor(state: AgentState) -> AgentState:
+    _debug("risk_assessor: evaluating")
     ctx = state.get("payment_ctx", {})
     updates: Dict[str, Any] = {}
     amount = ctx.get("amount_usdc", 0.0)
@@ -364,26 +529,47 @@ def risk_assessor(state: AgentState) -> AgentState:
     risk_reasons = []
     risk_score = 0.0
 
+    def _finalize() -> AgentState:
+        updates["audit_log"] = [
+            {
+                "event": "policy",
+                "decision": updates.get("policy_decision"),
+                "risk_score": updates.get("risk_score"),
+                "risk_reasons": updates.get("risk_reasons"),
+                "amount_usdc": amount,
+                "thresholds": {
+                    "auto_pay_threshold": auto_pay_threshold,
+                    "hitl_threshold": hitl_threshold,
+                    "hard_limit": hard_limit,
+                },
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ]
+        updates.setdefault("payment_ctx", {})
+        updates["payment_ctx"]["status"] = "risk_check"
+        return updates
+
     if state["wallet_balance"] < amount:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["insufficient_balance"]
         updates["risk_score"] = 3.0
         updates["payment_ctx"] = {"status": "failed", "error_type": "insufficient_balance"}
-        return updates
+        return _finalize()
 
     if policy_blocked or force_reject:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["policy_reject"]
         updates["risk_score"] = 3.0
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return updates
+        return _finalize()
 
     if amount > hard_limit:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["hard_limit_exceeded"]
         updates["risk_score"] = 2.5
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return updates
+        return _finalize()
 
     payee = (ctx.get("selected_accept") or {}).get("to", "")
     if payee and payee.lower() in payee_blacklist:
@@ -393,7 +579,7 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = risk_reasons
         updates["risk_score"] = risk_score
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return updates
+        return _finalize()
 
     if whitelist_domains and service_domain in whitelist_domains:
         domain_trusted = True
@@ -408,7 +594,7 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = risk_reasons
         updates["risk_score"] = risk_score
         updates["payment_ctx"] = {"status": "risk_check"}
-        return updates
+        return _finalize()
 
     if state["session_spend"] + amount > state["budget_limit"]:
         updates["human_approval_required"] = True
@@ -418,7 +604,7 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = risk_reasons
         updates["risk_score"] = risk_score
         updates["payment_ctx"] = {"status": "risk_check"}
-        return updates
+        return _finalize()
 
     if amount <= auto_pay_threshold and amount <= hitl_threshold:
         updates["human_approval_required"] = False
@@ -431,24 +617,16 @@ def risk_assessor(state: AgentState) -> AgentState:
 
     updates["risk_reasons"] = risk_reasons
     updates["risk_score"] = risk_score
-    updates["audit_log"] = [
-        {
-            "event": "policy",
-            "decision": updates.get("policy_decision"),
-            "risk_score": risk_score,
-            "risk_reasons": risk_reasons,
-            "timestamp": int(time.time()),
-        }
-    ]
-    updates["payment_ctx"] = {"status": "risk_check"}
-    return updates
+    updates["risk_reasons"] = risk_reasons
+    updates["risk_score"] = risk_score
+    return _finalize()
 
 
 def reflection_rewriter(state: AgentState) -> AgentState:
     ctx = state.get("payment_ctx", {})
     updates: Dict[str, Any] = {}
     error_type = ctx.get("error_type")
-    llm = state.get("llm_client")
+    llm = _get_llm(state)
     if not llm:
         return {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
@@ -460,7 +638,7 @@ def reflection_rewriter(state: AgentState) -> AgentState:
         "retry_count": ctx.get("retry_count"),
         "last_http_status": ctx.get("last_http_status"),
     }
-    result, messages = llm.reflect(
+    result, messages, raw_result = llm.reflect(
         history,
         {
             "error_type": error_type,
@@ -471,9 +649,19 @@ def reflection_rewriter(state: AgentState) -> AgentState:
     )
     notes = result.model_dump()
     updates["messages"] = messages
-    if notes.get("action") == "reselect_accept":
+    action = notes.get("action")
+    normalized_action = "abort"
+    if isinstance(action, str):
+        if action.startswith("retry"):
+            normalized_action = "retry_request"
+        elif action in {"switch_accept", "reselect", "reselect_accept"}:
+            normalized_action = "reselect_accept"
+        elif action in {"human_approval", "abort"}:
+            normalized_action = action
+    notes["action"] = normalized_action
+    if normalized_action == "reselect_accept":
         updates["payment_ctx"] = {"selected_accept": None}
-    if notes.get("action") == "retry_request":
+    if normalized_action == "retry_request":
         updates["payment_ctx"] = {"status": "retrying"}
     blacklist_payee = notes.get("blacklist_payee")
     if blacklist_payee:
@@ -498,10 +686,20 @@ def reflection_rewriter(state: AgentState) -> AgentState:
     updates["reflection_notes"] = notes
     updates["audit_log"] = [
         {
+            "event": "llm_reflection",
+            "input": payload,
+            "output": {
+                "structured_response": result.model_dump(),
+                "messages": _serialize_messages(raw_result.get("messages", [])),
+            },
+            "timestamp": int(time.time()),
+        },
+        {
             "event": "reflection",
             "notes": notes,
+            "state": _state_snapshot(state),
             "timestamp": int(time.time()),
-        }
+        },
     ]
     return updates
 
@@ -519,7 +717,9 @@ def human_approver(state: AgentState) -> AgentState:
         "audit_log": [
             {
                 "event": "hitl",
+                "prompt": prompt,
                 "decision": decision,
+                "state": _state_snapshot(state),
                 "timestamp": int(time.time()),
             }
         ],
@@ -530,6 +730,7 @@ def human_approver(state: AgentState) -> AgentState:
 
 
 def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentState:
+    _debug("payment_signer: signing payload")
     ctx = state.get("payment_ctx", {})
     selected = ctx.get("selected_accept")
     if not selected:
@@ -592,6 +793,19 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
     return {
         "payment_ctx": {"signed_payload": encoded, "status": "authorized"},
         "session_spend": state.get("session_spend", 0.0) + amount,
+        "audit_log": [
+            {
+                "event": "payment_signer",
+                "network": selected.get("network"),
+                "asset": selected.get("asset"),
+                "amount_usdc": amount,
+                "authorization": authorization,
+                "domain": domain,
+                "types": types,
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            }
+        ],
     }
 
 
@@ -608,10 +822,13 @@ def response_validator(state: AgentState) -> AgentState:
         "payment_ctx": {"tx_hash": tx_hash, "status": "success"},
         "audit_log": [
             {
+                "event": "response_validator",
                 "amount_usdc": ctx.get("amount_usdc"),
                 "payee": (ctx.get("selected_accept") or {}).get("to"),
                 "network": (ctx.get("selected_accept") or {}).get("network"),
                 "tx_hash": tx_hash,
+                "receipt_raw": receipt_raw,
+                "state": _state_snapshot(state),
                 "timestamp": int(time.time()),
             }
         ],
@@ -633,17 +850,46 @@ def error_handler(state: AgentState) -> AgentState:
     if error_type in {"insufficient_balance", "policy_reject", "user_reject"}:
         updates.setdefault("payment_ctx", {})
         updates["payment_ctx"].update({"status": "failed"})
+    updates["audit_log"] = [
+        {
+            "event": "error_handler",
+            "error_type": error_type,
+            "state": _state_snapshot(state),
+            "timestamp": int(time.time()),
+        }
+    ]
     return updates
 
 
 def normal_chat(state: AgentState) -> AgentState:
     task_text = state.get("task_text") or ""
+    llm = _get_llm(state)
+    if not llm:
+        return {
+            "payment_ctx": {"status": "failed", "error_type": "llm_required"},
+            "audit_log": [{"event": "normal_chat", "error": "llm_required", "timestamp": int(time.time())}],
+        }
+    history = list(state.get("messages", []))
+    result, messages, raw_result = llm.normal_chat(history, task_text, state.get("thread_id"))
+    response_text = result.response
     return {
-        "messages": [AIMessage(content=f"No payment required for task: {task_text}")],
+        "messages": messages + [AIMessage(content=response_text)],
+        "payment_ctx": {"status": "success", "error_type": None},
         "audit_log": [
             {
-                "event": "normal_chat",
+                "event": "llm_chat",
+                "input": {"task_text": task_text},
+                "output": {
+                    "structured_response": result.model_dump(),
+                    "messages": _serialize_messages(raw_result.get("messages", [])),
+                },
                 "timestamp": int(time.time()),
-            }
+            },
+            {
+                "event": "normal_chat",
+                "response": response_text,
+                "state": _state_snapshot(state),
+                "timestamp": int(time.time()),
+            },
         ],
     }
