@@ -47,6 +47,174 @@
 8. `response_validator` 解析收据
 9. 失败进入 `error_handler` + `reflection_rewriter` 重试或终止
 
+## 支付子图节点详解（策略 + 输入/输出示例）
+以下示例基于 Demo‑3（小额自动支付）与 Demo‑4（HITL）场景。
+
+### 1) request_executor
+- 策略：发送请求；如果 402，则读取 `PAYMENT-REQUIRED`；如果 200，直接完成。
+- 输入示例（state 关键字段）：
+```json
+{
+  "payment_ctx": {
+    "target_url": "http://127.0.0.1:18081/api/weather",
+    "http_method": "GET",
+    "signed_payload": null
+  }
+}
+```
+- 输出示例（402）：
+```json
+{
+  "payment_ctx": {
+    "status": "payment_required",
+    "requirements_raw": "<base64>",
+    "last_http_status": 402
+  }
+}
+```
+- x402 相关 Header：
+  - 请求：无
+  - 响应：`PAYMENT-REQUIRED: <base64-json>`
+
+### 2) header_parser
+- 策略：解码 `PAYMENT-REQUIRED`，提取 `accepts[]` 并计算 `amount_usdc`。
+- 输入：`payment_ctx.requirements_raw`
+- 输出示例：
+```json
+{
+  "payment_ctx": {
+    "requirements": {
+      "x402Version": "1.0",
+      "accepts": [
+        {"network": "base", "asset": "USDC", "decimals": 6, "amount": "50000"},
+        {"network": "base", "asset": "USDC", "decimals": 6, "amount": "75000"}
+      ]
+    },
+    "amount_usdc": 0.05
+  }
+}
+```
+
+### 3) payment_negotiator
+- 策略：LLM 选择最合适的 `accept`（价格/网络/偏好）。
+- 输入：`requirements.accepts` + `payment_preferences` + `wallet_balance`
+- 输出示例：
+```json
+{
+  "payment_ctx": {
+    "selected_accept": {
+      "network": "base",
+      "asset": "USDC",
+      "amount": "50000",
+      "decimals": 6
+    },
+    "amount_usdc": 0.05
+  },
+  "policy_decision": "auto"
+}
+```
+
+### 4) risk_assessor
+- 策略：金额 > hitl_threshold 强制 HITL；否则自动/拒绝。
+- 输入：`amount_usdc`, `wallet_balance`, `policy`
+- 输出示例（HITL）：
+```json
+{
+  "policy_decision": "hitl",
+  "human_approval_required": true
+}
+```
+
+### 5) human_approver
+- 策略：触发 `interrupt()`，等待 `approve/reject`。
+- 输入：`amount_usdc`, `selected_accept`
+- 输出示例：
+```json
+{
+  "user_decision": "approve"
+}
+```
+
+### 6) payment_signer
+- 策略：构造 EIP‑712 / EIP‑3009 授权并签名，生成 `PAYMENT-SIGNATURE`。
+- 输入：`selected_accept`, 钱包地址/私钥（仅存在于 WalletProvider）
+- 输出示例（payload 结构）：
+```json
+{
+  "x402Version": "1.0",
+  "scheme": "exact",
+  "network": "base",
+  "payload": {
+    "signature": "0x...",
+    "authorization": {
+      "from": "0x...",
+      "to": "0x1111...",
+      "value": "50000",
+      "validAfter": 0,
+      "validBefore": 1730000000,
+      "nonce": "0x..."
+    },
+    "domain": {
+      "name": "USD Coin",
+      "version": "2",
+      "chainId": 8453,
+      "verifyingContract": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    },
+    "types": {
+      "EIP712Domain": [...],
+      "TransferWithAuthorization": [...]
+    },
+    "asset": "USDC"
+  }
+}
+```
+- x402 相关 Header：
+  - 请求：`PAYMENT-SIGNATURE: <base64-json>`
+
+### 7) response_validator
+- 策略：解析 `PAYMENT-RESPONSE` 收据。
+- 输入：响应 header `PAYMENT-RESPONSE`
+- 输出示例：
+```json
+{
+  "payment_ctx": {
+    "tx_hash": "0xmocktxhash",
+    "status": "success"
+  }
+}
+```
+
+### 8) error_handler
+- 策略：错误分类，网络退避或终止。
+- 输入：`payment_ctx.error_type`
+- 输出示例：
+```json
+{
+  "payment_ctx": {
+    "status": "failed",
+    "error_type": "payment_loop"
+  }
+}
+```
+
+### 9) reflection_rewriter
+- 策略：LLM 反思失败原因，决定重试/改策略/转人工。
+- 输入：`error_type`, `retry_count`, `last_http_status`
+- 输出示例：
+```json
+{
+  "reflection_notes": {
+    "action": "retry_request",
+    "reason": "transient verification failure"
+  }
+}
+```
+
+## x402 关键请求头与编码
+- `PAYMENT-REQUIRED`: base64(JSON)，包含 `accepts[]`
+- `PAYMENT-SIGNATURE`: base64(JSON)，包含 EIP‑712 签名载荷
+- `PAYMENT-RESPONSE`: base64(JSON)，包含收据 / txHash
+
 ## 目录结构
 - `src/utils.py`：状态定义、reducers、服务注册表、钱包
 - `src/nodes.py`：节点实现与日志写入

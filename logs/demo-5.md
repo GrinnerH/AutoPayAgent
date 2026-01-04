@@ -4,8 +4,8 @@
 
 - status: success
 - error_type: None
-- intent: {"is_payment_task": true, "service_type": "market_report_retry", "service_query": "研究报告 市场报告 付费报告", "query_params": {}, "constraints": {"paid_required": true, "require_retry_service": true}}
-- selected_service: {"name": "Mock Market Intel Retry", "service_type": "market_report_retry", "url": "http://127.0.0.1:18083/api/reports/coinbase", "http_method": "GET", "supports_x402": true, "reputation": "ok", "whitelist_tag": false, "description": "Paid report service that intentionally fails first verification to test retry/reflection.", "supports_retry": true, "headers": {}, "body": null}
+- intent: {"is_payment_task": true, "service_type": "market_research", "service_query": "web3 market research report download industry analysis", "query_params": {"industry": "web3", "report_type": "market_research", "language": "chinese"}, "constraints": {"paid_required": true, "format": "downloadable_report", "industry_specific": true}}
+- selected_service: {"name": "Mock Market Intel", "service_type": "market_report", "url": "http://127.0.0.1:18082/api/reports/coinbase", "http_method": "GET", "supports_x402": true, "reputation": "ok", "whitelist_tag": false, "description": "Paid deep research report with analysis and charts.", "supports_retry": false, "headers": {}, "body": null}
 
 ## Node Trace
 
@@ -15,23 +15,28 @@
 {
   "event": "llm_intent",
   "input": {
-    "task_text": "调用付费服务获取研究报告，并在支付验证失败时进行反思重试"
+    "task_text": "下载一份web3行业的市场研究报告"
   },
   "output": {
     "structured_response": {
       "is_payment_task": true,
-      "service_type": "market_report_retry",
-      "service_query": "研究报告 市场报告 付费报告",
-      "query_params": {},
+      "service_type": "market_research",
+      "service_query": "web3 market research report download industry analysis",
+      "query_params": {
+        "industry": "web3",
+        "report_type": "market_research",
+        "language": "chinese"
+      },
       "constraints": {
         "paid_required": true,
-        "require_retry_service": true
+        "format": "downloadable_report",
+        "industry_specific": true
       }
     },
     "messages": [
       {
         "type": "human",
-        "content": "调用付费服务获取研究报告，并在支付验证失败时进行反思重试",
+        "content": "下载一份web3行业的市场研究报告",
         "additional_kwargs": {}
       },
       {
@@ -43,12 +48,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download industry analysis' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report', 'industry_specific': True}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -59,12 +64,17 @@
   "event": "intent",
   "intent": {
     "is_payment_task": true,
-    "service_type": "market_report_retry",
-    "service_query": "研究报告 市场报告 付费报告",
-    "query_params": {},
+    "service_type": "market_research",
+    "service_query": "web3 market research report download industry analysis",
+    "query_params": {
+      "industry": "web3",
+      "report_type": "market_research",
+      "language": "chinese"
+    },
     "constraints": {
       "paid_required": true,
-      "require_retry_service": true
+      "format": "downloadable_report",
+      "industry_specific": true
     }
   },
   "state": {
@@ -80,7 +90,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -91,30 +101,48 @@
   "event": "discovery",
   "candidates": [
     {
-      "name": "Mock Market Intel Retry",
-      "service_type": "market_report_retry",
-      "url": "http://127.0.0.1:18083/api/reports/coinbase",
+      "name": "Mock Weather Pro",
+      "service_type": "weather",
+      "url": "http://127.0.0.1:18081/api/weather",
+      "http_method": "GET",
+      "supports_x402": true,
+      "reputation": "ok",
+      "whitelist_tag": true,
+      "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+      "supports_retry": false,
+      "headers": {},
+      "body": null
+    },
+    {
+      "name": "Mock Market Intel",
+      "service_type": "market_report",
+      "url": "http://127.0.0.1:18082/api/reports/coinbase",
       "http_method": "GET",
       "supports_x402": true,
       "reputation": "ok",
       "whitelist_tag": false,
-      "description": "Paid report service that intentionally fails first verification to test retry/reflection.",
-      "supports_retry": true,
+      "description": "Paid deep research report with analysis and charts.",
+      "supports_retry": false,
       "headers": {},
       "body": null
     }
   ],
   "intent": {
     "is_payment_task": true,
-    "service_type": "market_report_retry",
-    "service_query": "研究报告 市场报告 付费报告",
-    "query_params": {},
+    "service_type": "market_research",
+    "service_query": "web3 market research report download industry analysis",
+    "query_params": {
+      "industry": "web3",
+      "report_type": "market_research",
+      "language": "chinese"
+    },
     "constraints": {
       "paid_required": true,
-      "require_retry_service": true
+      "format": "downloadable_report",
+      "industry_specific": true
     }
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -124,19 +152,32 @@
 {
   "event": "llm_service_select",
   "input": {
-    "service_query": "研究报告 市场报告 付费报告",
-    "service_type": "market_report_retry",
+    "service_query": "web3 market research report download industry analysis",
+    "service_type": "market_research",
     "candidates": [
       {
-        "name": "Mock Market Intel Retry",
-        "service_type": "market_report_retry",
-        "url": "http://127.0.0.1:18083/api/reports/coinbase",
+        "name": "Mock Weather Pro",
+        "service_type": "weather",
+        "url": "http://127.0.0.1:18081/api/weather",
+        "http_method": "GET",
+        "supports_x402": true,
+        "reputation": "ok",
+        "whitelist_tag": true,
+        "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+        "supports_retry": false,
+        "headers": {},
+        "body": null
+      },
+      {
+        "name": "Mock Market Intel",
+        "service_type": "market_report",
+        "url": "http://127.0.0.1:18082/api/reports/coinbase",
         "http_method": "GET",
         "supports_x402": true,
         "reputation": "ok",
         "whitelist_tag": false,
-        "description": "Paid report service that intentionally fails first verification to test retry/reflection.",
-        "supports_retry": true,
+        "description": "Paid deep research report with analysis and charts.",
+        "supports_retry": false,
         "headers": {},
         "body": null
       }
@@ -144,9 +185,9 @@
   },
   "output": {
     "structured_response": {
-      "selected_index": 0,
-      "service_name": "Mock Market Intel Retry",
-      "reason": "This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation."
+      "selected_index": 1,
+      "service_name": "Mock Market Intel",
+      "reason": "The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research."
     },
     "messages": [
       {
@@ -158,12 +199,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download industry analysis' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report', 'industry_specific': True}",
         "additional_kwargs": {}
       },
       {
         "type": "human",
-        "content": "{'service_query': '研究报告 市场报告 付费报告', 'service_type': 'market_report_retry', 'candidates': [{'name': 'Mock Market Intel Retry', 'service_type': 'market_report_retry', 'url': 'http://127.0.0.1:18083/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid report service that intentionally fails first verification to test retry/reflection.', 'supports_retry': True, 'headers': {}, 'body': None}]}",
+        "content": "{'service_query': 'web3 market research report download industry analysis', 'service_type': 'market_research', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid deep research report with analysis and charts.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
         "additional_kwargs": {}
       },
       {
@@ -175,12 +216,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Market Intel Retry' reason=\"This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.\"",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -189,9 +230,9 @@
 ```json
 {
   "event": "service_select",
-  "selected_index": 0,
-  "service_name": "Mock Market Intel Retry",
-  "reason": "This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.",
+  "selected_index": 1,
+  "service_name": "Mock Market Intel",
+  "reason": "The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -205,7 +246,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -215,23 +256,28 @@
 {
   "event": "llm_intent",
   "input": {
-    "task_text": "调用付费服务获取研究报告，并在支付验证失败时进行反思重试"
+    "task_text": "下载一份web3行业的市场研究报告"
   },
   "output": {
     "structured_response": {
       "is_payment_task": true,
-      "service_type": "market_report_retry",
-      "service_query": "研究报告 市场报告 付费报告",
-      "query_params": {},
+      "service_type": "market_research",
+      "service_query": "web3 market research report download industry analysis",
+      "query_params": {
+        "industry": "web3",
+        "report_type": "market_research",
+        "language": "chinese"
+      },
       "constraints": {
         "paid_required": true,
-        "require_retry_service": true
+        "format": "downloadable_report",
+        "industry_specific": true
       }
     },
     "messages": [
       {
         "type": "human",
-        "content": "调用付费服务获取研究报告，并在支付验证失败时进行反思重试",
+        "content": "下载一份web3行业的市场研究报告",
         "additional_kwargs": {}
       },
       {
@@ -243,12 +289,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download industry analysis' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report', 'industry_specific': True}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -259,12 +305,17 @@
   "event": "intent",
   "intent": {
     "is_payment_task": true,
-    "service_type": "market_report_retry",
-    "service_query": "研究报告 市场报告 付费报告",
-    "query_params": {},
+    "service_type": "market_research",
+    "service_query": "web3 market research report download industry analysis",
+    "query_params": {
+      "industry": "web3",
+      "report_type": "market_research",
+      "language": "chinese"
+    },
     "constraints": {
       "paid_required": true,
-      "require_retry_service": true
+      "format": "downloadable_report",
+      "industry_specific": true
     }
   },
   "state": {
@@ -280,7 +331,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -291,30 +342,48 @@
   "event": "discovery",
   "candidates": [
     {
-      "name": "Mock Market Intel Retry",
-      "service_type": "market_report_retry",
-      "url": "http://127.0.0.1:18083/api/reports/coinbase",
+      "name": "Mock Weather Pro",
+      "service_type": "weather",
+      "url": "http://127.0.0.1:18081/api/weather",
+      "http_method": "GET",
+      "supports_x402": true,
+      "reputation": "ok",
+      "whitelist_tag": true,
+      "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+      "supports_retry": false,
+      "headers": {},
+      "body": null
+    },
+    {
+      "name": "Mock Market Intel",
+      "service_type": "market_report",
+      "url": "http://127.0.0.1:18082/api/reports/coinbase",
       "http_method": "GET",
       "supports_x402": true,
       "reputation": "ok",
       "whitelist_tag": false,
-      "description": "Paid report service that intentionally fails first verification to test retry/reflection.",
-      "supports_retry": true,
+      "description": "Paid deep research report with analysis and charts.",
+      "supports_retry": false,
       "headers": {},
       "body": null
     }
   ],
   "intent": {
     "is_payment_task": true,
-    "service_type": "market_report_retry",
-    "service_query": "研究报告 市场报告 付费报告",
-    "query_params": {},
+    "service_type": "market_research",
+    "service_query": "web3 market research report download industry analysis",
+    "query_params": {
+      "industry": "web3",
+      "report_type": "market_research",
+      "language": "chinese"
+    },
     "constraints": {
       "paid_required": true,
-      "require_retry_service": true
+      "format": "downloadable_report",
+      "industry_specific": true
     }
   },
-  "timestamp": 1767499539
+  "timestamp": 1767509637
 }
 ```
 
@@ -324,19 +393,32 @@
 {
   "event": "llm_service_select",
   "input": {
-    "service_query": "研究报告 市场报告 付费报告",
-    "service_type": "market_report_retry",
+    "service_query": "web3 market research report download industry analysis",
+    "service_type": "market_research",
     "candidates": [
       {
-        "name": "Mock Market Intel Retry",
-        "service_type": "market_report_retry",
-        "url": "http://127.0.0.1:18083/api/reports/coinbase",
+        "name": "Mock Weather Pro",
+        "service_type": "weather",
+        "url": "http://127.0.0.1:18081/api/weather",
+        "http_method": "GET",
+        "supports_x402": true,
+        "reputation": "ok",
+        "whitelist_tag": true,
+        "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+        "supports_retry": false,
+        "headers": {},
+        "body": null
+      },
+      {
+        "name": "Mock Market Intel",
+        "service_type": "market_report",
+        "url": "http://127.0.0.1:18082/api/reports/coinbase",
         "http_method": "GET",
         "supports_x402": true,
         "reputation": "ok",
         "whitelist_tag": false,
-        "description": "Paid report service that intentionally fails first verification to test retry/reflection.",
-        "supports_retry": true,
+        "description": "Paid deep research report with analysis and charts.",
+        "supports_retry": false,
         "headers": {},
         "body": null
       }
@@ -344,9 +426,9 @@
   },
   "output": {
     "structured_response": {
-      "selected_index": 0,
-      "service_name": "Mock Market Intel Retry",
-      "reason": "This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation."
+      "selected_index": 1,
+      "service_name": "Mock Market Intel",
+      "reason": "The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research."
     },
     "messages": [
       {
@@ -358,12 +440,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download industry analysis' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report', 'industry_specific': True}",
         "additional_kwargs": {}
       },
       {
         "type": "human",
-        "content": "{'service_query': '研究报告 市场报告 付费报告', 'service_type': 'market_report_retry', 'candidates': [{'name': 'Mock Market Intel Retry', 'service_type': 'market_report_retry', 'url': 'http://127.0.0.1:18083/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid report service that intentionally fails first verification to test retry/reflection.', 'supports_retry': True, 'headers': {}, 'body': None}]}",
+        "content": "{'service_query': 'web3 market research report download industry analysis', 'service_type': 'market_research', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid deep research report with analysis and charts.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
         "additional_kwargs": {}
       },
       {
@@ -375,12 +457,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Market Intel Retry' reason=\"This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.\"",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -389,9 +471,9 @@
 ```json
 {
   "event": "service_select",
-  "selected_index": 0,
-  "service_name": "Mock Market Intel Retry",
-  "reason": "This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.",
+  "selected_index": 1,
+  "service_name": "Mock Market Intel",
+  "reason": "The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -405,7 +487,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -421,7 +503,7 @@
     "error_type": null,
     "retry_count": 0,
     "amount_usdc": 0.0,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": null,
     "policy_decision": null,
     "human_approval_required": false,
@@ -429,7 +511,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -439,7 +521,7 @@
 {
   "event": "request_executor",
   "status_code": 402,
-  "url": "http://127.0.0.1:18083/api/reports/coinbase",
+  "url": "http://127.0.0.1:18082/api/reports/coinbase",
   "has_signature": false,
   "error_type": null,
   "error_msg": null,
@@ -448,7 +530,7 @@
     "error_type": null,
     "retry_count": 0,
     "amount_usdc": 0.0,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": null,
     "policy_decision": null,
     "human_approval_required": false,
@@ -456,7 +538,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -466,7 +548,7 @@
 {
   "event": "header_parser",
   "accepts_count": 2,
-  "amount_usdc": 0.25,
+  "amount_usdc": 5.0,
   "requirements": {
     "x402Version": "1.0",
     "accepts": [
@@ -474,8 +556,8 @@
         "network": "base",
         "asset": "USDC",
         "decimals": 6,
-        "amount": "250000",
-        "to": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "to": "0x2222222222222222222222222222222222222222",
         "chainId": 8453,
         "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "scheme": "exact"
@@ -484,8 +566,8 @@
         "network": "base",
         "asset": "USDC",
         "decimals": 6,
-        "amount": "275000",
-        "to": "0x3333333333333333333333333333333333333333",
+        "amount": "5025000",
+        "to": "0x2222222222222222222222222222222222222222",
         "chainId": 8453,
         "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "scheme": "exact",
@@ -498,7 +580,7 @@
     "error_type": null,
     "retry_count": 0,
     "amount_usdc": 0.0,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": null,
     "policy_decision": null,
     "human_approval_required": false,
@@ -506,7 +588,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499545
+  "timestamp": 1767509644
 }
 ```
 
@@ -521,24 +603,24 @@
         "network": "base",
         "asset": "USDC",
         "decimals": 6,
-        "amount": "250000",
-        "to": "0x3333333333333333333333333333333333333333",
+        "amount": "5000000",
+        "to": "0x2222222222222222222222222222222222222222",
         "chainId": 8453,
         "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "scheme": "exact",
-        "amount_usdc": 0.25
+        "amount_usdc": 5.0
       },
       {
         "network": "base",
         "asset": "USDC",
         "decimals": 6,
-        "amount": "275000",
-        "to": "0x3333333333333333333333333333333333333333",
+        "amount": "5025000",
+        "to": "0x2222222222222222222222222222222222222222",
         "chainId": 8453,
         "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "scheme": "exact",
         "note": "priority settlement",
-        "amount_usdc": 0.275
+        "amount_usdc": 5.025
       }
     ],
     "preferences": {
@@ -552,13 +634,13 @@
       "service_path": "/api/reports/coinbase",
       "service_scheme": "http",
       "domain_trusted": false,
-      "service_name": "Mock Market Intel Retry"
+      "service_name": "Mock Market Intel"
     }
   },
   "output": {
     "structured_response": {
       "selected_index": 0,
-      "reason": "I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.",
+      "reason": "I recommend accepting the first option (5.0 USDC) because: 1) The wallet balance of 10.0 USDC is sufficient to cover either payment, 2) The first option is cheaper at 5.0 USDC vs 5.025 USDC for priority settlement, 3) Both options meet the user's preferences for Base network and USDC asset with exact scheme, 4) The service is a market research report which typically doesn't require priority settlement, 5) There are risk flags (untrusted domain, localhost) but these appear to be test environment flags rather than actual security concerns for a demo scenario. The cost savings of 0.025 USDC (approximately $0.025) is small but still represents better value for the same service.",
       "policy_decision": "auto"
     },
     "messages": [
@@ -571,7 +653,7 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download industry analysis' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report', 'industry_specific': True}",
         "additional_kwargs": {}
       },
       {
@@ -583,12 +665,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Market Intel Retry' reason=\"This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.\"",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"The user needs a paid market research report for the web3 industry in Chinese format. Mock Market Intel is a market_report service that provides paid deep research reports with analysis and charts, which matches the requirements for a downloadable industry-specific market research report. Although the description doesn't explicitly mention web3 or Chinese language, it's the only market research service available and is paid (as required). The other service (Mock Weather Pro) is a weather service and completely unrelated to market research.\"",
         "additional_kwargs": {}
       },
       {
         "type": "human",
-        "content": "{'accepts': [{'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '250000', 'to': '0x3333333333333333333333333333333333333333', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'amount_usdc': 0.25}, {'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '275000', 'to': '0x3333333333333333333333333333333333333333', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'note': 'priority settlement', 'amount_usdc': 0.275}], 'preferences': {'network': 'base', 'asset': 'usdc', 'scheme': 'exact'}, 'wallet_balance': 10.0, 'risk_flags': {'service_domain': '127.0.0.1', 'service_path': '/api/reports/coinbase', 'service_scheme': 'http', 'domain_trusted': False, 'service_name': 'Mock Market Intel Retry'}}",
+        "content": "{'accepts': [{'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '5000000', 'to': '0x2222222222222222222222222222222222222222', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'amount_usdc': 5.0}, {'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '5025000', 'to': '0x2222222222222222222222222222222222222222', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'note': 'priority settlement', 'amount_usdc': 5.025}], 'preferences': {'network': 'base', 'asset': 'usdc', 'scheme': 'exact'}, 'wallet_balance': 10.0, 'risk_flags': {'service_domain': '127.0.0.1', 'service_path': '/api/reports/coinbase', 'service_scheme': 'http', 'domain_trusted': False, 'service_name': 'Mock Market Intel'}}",
         "additional_kwargs": {}
       },
       {
@@ -612,12 +694,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 reason=\"I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.\" policy_decision='auto'",
+        "content": "Returning structured response: selected_index=0 reason=\"I recommend accepting the first option (5.0 USDC) because: 1) The wallet balance of 10.0 USDC is sufficient to cover either payment, 2) The first option is cheaper at 5.0 USDC vs 5.025 USDC for priority settlement, 3) Both options meet the user's preferences for Base network and USDC asset with exact scheme, 4) The service is a market research report which typically doesn't require priority settlement, 5) There are risk flags (untrusted domain, localhost) but these appear to be test environment flags rather than actual security concerns for a demo scenario. The cost savings of 0.025 USDC (approximately $0.025) is small but still represents better value for the same service.\" policy_decision='auto'",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499554
+  "timestamp": 1767509659
 }
 ```
 
@@ -631,22 +713,22 @@
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
     },
     "reason": "preference_match",
-    "amount_usdc": 0.25
+    "amount_usdc": 5.0
   },
   "policy_decision": "auto",
   "state": {
     "status": "analyzing",
     "error_type": null,
     "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": null,
     "policy_decision": null,
     "human_approval_required": false,
@@ -654,7 +736,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499554
+  "timestamp": 1767509659
 }
 ```
 
@@ -664,28 +746,28 @@
 {
   "event": "policy",
   "decision": "hitl",
-  "risk_score": 1.5,
+  "risk_score": 1.0,
   "risk_reasons": [
-    "untrusted_service"
+    "amount_over_hitl_threshold"
   ],
-  "amount_usdc": 0.25,
+  "amount_usdc": 5.0,
   "thresholds": {
     "auto_pay_threshold": 1.0,
-    "hitl_threshold": 1.0,
+    "hitl_threshold": 2.0,
     "hard_limit": 10.0
   },
   "state": {
     "status": "negotiating",
     "error_type": null,
     "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -696,7 +778,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499554
+  "timestamp": 1767509659
 }
 ```
 
@@ -706,13 +788,13 @@
 {
   "event": "hitl",
   "prompt": {
-    "amount_usdc": 0.25,
+    "amount_usdc": 5.0,
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -724,14 +806,14 @@
     "status": "risk_check",
     "error_type": null,
     "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -742,7 +824,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499554
+  "timestamp": 1767509659
 }
 ```
 
@@ -753,14 +835,14 @@
   "event": "payment_signer",
   "network": "base",
   "asset": "USDC",
-  "amount_usdc": 0.25,
+  "amount_usdc": 5.0,
   "authorization": {
-    "from": "0x0151AD19b868E506F5B964aEB841AA2526df6e79",
-    "to": "0x3333333333333333333333333333333333333333",
-    "value": "250000",
+    "from": "0x43E65BC06a003f40c853F2546A356B815799d991",
+    "to": "0x2222222222222222222222222222222222222222",
+    "value": "5000000",
     "validAfter": 0,
-    "validBefore": 1767503154,
-    "nonce": "0xafd38fe59b563c24e861f9571d0d45c9fb9a3d5f4d60e5c6a75b19a36a8c3cb7"
+    "validBefore": 1767513259,
+    "nonce": "0x327b6a670d2d41c83090b21612ba4bc398e79a5087dd48856bf276bffa82f7b1"
   },
   "domain": {
     "name": "USD Coin",
@@ -818,14 +900,14 @@
     "status": "risk_check",
     "error_type": null,
     "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -836,786 +918,32 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499554
+  "timestamp": 1767509659
 }
 ```
 
-### 19. payment_required
-
-```json
-{
-  "event": "payment_required",
-  "reason": "verification_failed",
-  "retry_count": 1,
-  "state": {
-    "status": "authorized",
-    "error_type": null,
-    "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499554
-}
-```
-
-### 20. request_executor
-
-```json
-{
-  "event": "request_executor",
-  "status_code": 402,
-  "url": "http://127.0.0.1:18083/api/reports/coinbase",
-  "has_signature": true,
-  "error_type": "payment_verification_failed",
-  "error_msg": "verification_failed",
-  "state": {
-    "status": "authorized",
-    "error_type": null,
-    "retry_count": 0,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499554
-}
-```
-
-### 21. error_handler
-
-```json
-{
-  "event": "error_handler",
-  "error_type": "payment_verification_failed",
-  "state": {
-    "status": "payment_required",
-    "error_type": "payment_verification_failed",
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499554
-}
-```
-
-### 22. llm_reflection
-
-```json
-{
-  "event": "llm_reflection",
-  "input": {
-    "error_type": "payment_verification_failed",
-    "retry_count": 1,
-    "last_http_status": 402
-  },
-  "output": {
-    "structured_response": {
-      "action": "retry_request",
-      "reason": "The payment verification failed with HTTP status 402 (Payment Required), which is a transient verification failure. The retry_count is only 1, which is low, and the payee reputation is 'ok'. This service is specifically designed as a 'Mock Market Intel Retry' service that intentionally fails first verification to test retry functionality. Given the low retry count and the nature of this being a test service, retry_request is the appropriate action.",
-      "notes": {
-        "error_type": "payment_verification_failed",
-        "retry_count": 1,
-        "last_http_status": 402,
-        "payee_reputation": "ok",
-        "service_type": "market_report_retry",
-        "service_name": "Mock Market Intel Retry"
-      }
-    },
-    "messages": [
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Market Intel Retry' reason=\"This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.\"",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "10.0",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: selected_index=0 reason=\"I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.\" policy_decision='auto'",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "human",
-        "content": "{'error_type': 'payment_verification_failed', 'retry_count': 1, 'last_http_status': 402}",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "ok",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: action='retry_request' reason=\"The payment verification failed with HTTP status 402 (Payment Required), which is a transient verification failure. The retry_count is only 1, which is low, and the payee reputation is 'ok'. This service is specifically designed as a 'Mock Market Intel Retry' service that intentionally fails first verification to test retry functionality. Given the low retry count and the nature of this being a test service, retry_request is the appropriate action.\" notes={'error_type': 'payment_verification_failed', 'retry_count': 1, 'last_http_status': 402, 'payee_reputation': 'ok', 'service_type': 'market_report_retry', 'service_name': 'Mock Market Intel Retry'}",
-        "additional_kwargs": {}
-      }
-    ]
-  },
-  "timestamp": 1767499565
-}
-```
-
-### 23. reflection
-
-```json
-{
-  "event": "reflection",
-  "notes": {
-    "action": "retry_request",
-    "reason": "The payment verification failed with HTTP status 402 (Payment Required), which is a transient verification failure. The retry_count is only 1, which is low, and the payee reputation is 'ok'. This service is specifically designed as a 'Mock Market Intel Retry' service that intentionally fails first verification to test retry functionality. Given the low retry count and the nature of this being a test service, retry_request is the appropriate action.",
-    "notes": {
-      "error_type": "payment_verification_failed",
-      "retry_count": 1,
-      "last_http_status": 402,
-      "payee_reputation": "ok",
-      "service_type": "market_report_retry",
-      "service_name": "Mock Market Intel Retry"
-    }
-  },
-  "state": {
-    "status": "failed",
-    "error_type": "payment_verification_failed",
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499565
-}
-```
-
-### 24. payment_required
-
-```json
-{
-  "event": "payment_required",
-  "reason": null,
-  "retry_count": 0,
-  "state": {
-    "status": "retrying",
-    "error_type": "payment_verification_failed",
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499565
-}
-```
-
-### 25. request_executor
-
-```json
-{
-  "event": "request_executor",
-  "status_code": 402,
-  "url": "http://127.0.0.1:18083/api/reports/coinbase",
-  "has_signature": false,
-  "error_type": null,
-  "error_msg": null,
-  "state": {
-    "status": "retrying",
-    "error_type": "payment_verification_failed",
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499565
-}
-```
-
-### 26. header_parser
-
-```json
-{
-  "event": "header_parser",
-  "accepts_count": 2,
-  "amount_usdc": 0.25,
-  "requirements": {
-    "x402Version": "1.0",
-    "accepts": [
-      {
-        "network": "base",
-        "asset": "USDC",
-        "decimals": 6,
-        "amount": "250000",
-        "to": "0x3333333333333333333333333333333333333333",
-        "chainId": 8453,
-        "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "scheme": "exact"
-      },
-      {
-        "network": "base",
-        "asset": "USDC",
-        "decimals": 6,
-        "amount": "275000",
-        "to": "0x3333333333333333333333333333333333333333",
-        "chainId": 8453,
-        "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "scheme": "exact",
-        "note": "priority settlement"
-      }
-    ]
-  },
-  "state": {
-    "status": "payment_required",
-    "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499565
-}
-```
-
-### 27. llm_negotiation
-
-```json
-{
-  "event": "llm_negotiation",
-  "input": {
-    "accepts": [
-      {
-        "network": "base",
-        "asset": "USDC",
-        "decimals": 6,
-        "amount": "250000",
-        "to": "0x3333333333333333333333333333333333333333",
-        "chainId": 8453,
-        "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "scheme": "exact",
-        "amount_usdc": 0.25
-      },
-      {
-        "network": "base",
-        "asset": "USDC",
-        "decimals": 6,
-        "amount": "275000",
-        "to": "0x3333333333333333333333333333333333333333",
-        "chainId": 8453,
-        "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        "scheme": "exact",
-        "note": "priority settlement",
-        "amount_usdc": 0.275
-      }
-    ],
-    "preferences": {
-      "network": "base",
-      "asset": "usdc",
-      "scheme": "exact"
-    },
-    "wallet_balance": 10.0,
-    "risk_flags": {
-      "service_domain": "127.0.0.1",
-      "service_path": "/api/reports/coinbase",
-      "service_scheme": "http",
-      "domain_trusted": false,
-      "service_name": "Mock Market Intel Retry"
-    }
-  },
-  "output": {
-    "structured_response": {
-      "selected_index": 0,
-      "reason": "I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.",
-      "policy_decision": "auto"
-    },
-    "messages": [
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_report_retry' service_query='研究报告 市场报告 付费报告' query_params={} constraints={'paid_required': True, 'require_retry_service': True}",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Market Intel Retry' reason=\"This is the only available service that matches the market_report_retry type and supports retry functionality. It's a paid report service that intentionally fails first verification to test retry/reflection, which aligns with the user's requirement for a market report service with retry capability. The service supports x402 payments and has an 'ok' reputation.\"",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "10.0",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: selected_index=0 reason=\"I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.\" policy_decision='auto'",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "ok",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: action='retry_request' reason=\"The payment verification failed with HTTP status 402 (Payment Required), which is a transient verification failure. The retry_count is only 1, which is low, and the payee reputation is 'ok'. This service is specifically designed as a 'Mock Market Intel Retry' service that intentionally fails first verification to test retry functionality. Given the low retry count and the nature of this being a test service, retry_request is the appropriate action.\" notes={'error_type': 'payment_verification_failed', 'retry_count': 1, 'last_http_status': 402, 'payee_reputation': 'ok', 'service_type': 'market_report_retry', 'service_name': 'Mock Market Intel Retry'}",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "human",
-        "content": "{'accepts': [{'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '250000', 'to': '0x3333333333333333333333333333333333333333', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'amount_usdc': 0.25}, {'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '275000', 'to': '0x3333333333333333333333333333333333333333', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'note': 'priority settlement', 'amount_usdc': 0.275}], 'preferences': {'network': 'base', 'asset': 'usdc', 'scheme': 'exact'}, 'wallet_balance': 10.0, 'risk_flags': {'service_domain': '127.0.0.1', 'service_path': '/api/reports/coinbase', 'service_scheme': 'http', 'domain_trusted': False, 'service_name': 'Mock Market Intel Retry'}}",
-        "additional_kwargs": {}
-      },
-      {
-        "type": "ai",
-        "content": "",
-        "additional_kwargs": {
-          "refusal": null
-        }
-      },
-      {
-        "type": "tool",
-        "content": "Returning structured response: selected_index=0 reason=\"I recommend accepting the first option (0.25 USDC) because: 1) It meets the exact scheme preference, 2) The wallet balance of 10.0 USDC is more than sufficient to cover either payment, 3) The service has an 'ok' reputation and is specifically designed for retry testing, 4) The lower amount (0.25 USDC vs 0.275 USDC) provides better value while still fulfilling the payment requirement, 5) Both options use the same network (Base) and asset (USDC) as preferred, 6) The risk flags indicate this is a local test environment which is acceptable for a mock retry service.\" policy_decision='auto'",
-        "additional_kwargs": {}
-      }
-    ]
-  },
-  "timestamp": 1767499572
-}
-```
-
-### 28. negotiation
-
-```json
-{
-  "event": "negotiation",
-  "result": {
-    "selected": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "reason": "preference_match",
-    "amount_usdc": 0.25
-  },
-  "policy_decision": "auto",
-  "state": {
-    "status": "analyzing",
-    "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499572
-}
-```
-
-### 29. policy
-
-```json
-{
-  "event": "policy",
-  "decision": "hitl",
-  "risk_score": 1.5,
-  "risk_reasons": [
-    "untrusted_service"
-  ],
-  "amount_usdc": 0.25,
-  "thresholds": {
-    "auto_pay_threshold": 1.0,
-    "hitl_threshold": 1.0,
-    "hard_limit": 10.0
-  },
-  "state": {
-    "status": "negotiating",
-    "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "auto",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499572
-}
-```
-
-### 30. hitl
-
-```json
-{
-  "event": "hitl",
-  "prompt": {
-    "amount_usdc": 0.25,
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "reason": "Payment requires approval"
-  },
-  "decision": "approve",
-  "state": {
-    "status": "risk_check",
-    "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499572
-}
-```
-
-### 31. payment_signer
-
-```json
-{
-  "event": "payment_signer",
-  "network": "base",
-  "asset": "USDC",
-  "amount_usdc": 0.25,
-  "authorization": {
-    "from": "0x0151AD19b868E506F5B964aEB841AA2526df6e79",
-    "to": "0x3333333333333333333333333333333333333333",
-    "value": "250000",
-    "validAfter": 0,
-    "validBefore": 1767503172,
-    "nonce": "0xe3e21fa595091e478a76f376f47898f0094ec4d7e7f42075e59e7b7b564c7da7"
-  },
-  "domain": {
-    "name": "USD Coin",
-    "version": "2",
-    "chainId": 8453,
-    "verifyingContract": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-  },
-  "types": {
-    "EIP712Domain": [
-      {
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "name": "version",
-        "type": "string"
-      },
-      {
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
-        "name": "verifyingContract",
-        "type": "address"
-      }
-    ],
-    "TransferWithAuthorization": [
-      {
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "name": "validAfter",
-        "type": "uint256"
-      },
-      {
-        "name": "validBefore",
-        "type": "uint256"
-      },
-      {
-        "name": "nonce",
-        "type": "bytes32"
-      }
-    ]
-  },
-  "state": {
-    "status": "risk_check",
-    "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
-    "selected_accept": {
-      "network": "base",
-      "asset": "USDC",
-      "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
-      "chainId": 8453,
-      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      "scheme": "exact"
-    },
-    "policy_decision": "hitl",
-    "human_approval_required": true,
-    "wallet_balance": 10.0,
-    "budget_limit": 5.0,
-    "auto_approve_threshold": 1.0
-  },
-  "timestamp": 1767499572
-}
-```
-
-### 32. request_executor
+### 19. request_executor
 
 ```json
 {
   "event": "request_executor",
   "status_code": 200,
-  "url": "http://127.0.0.1:18083/api/reports/coinbase",
+  "url": "http://127.0.0.1:18082/api/reports/coinbase",
   "has_signature": true,
   "error_type": null,
   "error_msg": null,
   "state": {
     "status": "authorized",
     "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "retry_count": 0,
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -1626,32 +954,32 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499572
+  "timestamp": 1767509659
 }
 ```
 
-### 33. response_validator
+### 20. response_validator
 
 ```json
 {
   "event": "response_validator",
-  "amount_usdc": 0.25,
-  "payee": "0x3333333333333333333333333333333333333333",
+  "amount_usdc": 5.0,
+  "payee": "0x2222222222222222222222222222222222222222",
   "network": "base",
-  "tx_hash": "0x397e4d60ef51ea2a7f9b2071a33a44a39ae760fda592a47a64a81863090acd22",
-  "receipt_raw": "eyJ0eEhhc2giOiAiMHgzOTdlNGQ2MGVmNTFlYTJhN2Y5YjIwNzFhMzNhNDRhMzlhZTc2MGZkYTU5MmE0N2E2NGE4MTg2MzA5MGFjZDIyIiwgInNldHRsZW1lbnRJZCI6ICJkYzA3NjBmYjAzY2QyMDRiN2UxZGRjY2E0Nzc2N2I4NTI3NTJkZTVlMTQ1MzYwNWFhOGY2YjBmYWMwYmZiMTliIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+  "tx_hash": "0x4648fc4ebb8e8999463da4dbddc5e25dabb9cfb5e79b1e5d1bf12a3b42e763b8",
+  "receipt_raw": "eyJ0eEhhc2giOiAiMHg0NjQ4ZmM0ZWJiOGU4OTk5NDYzZGE0ZGJkZGM1ZTI1ZGFiYjljZmI1ZTc5YjFlNWQxYmYxMmEzYjQyZTc2M2I4IiwgInNldHRsZW1lbnRJZCI6ICJkMjhjY2NhYmNiZGI0MDM0Yzc2NzVmZDU2Njg1Y2JjOGQ5ZTkzMmJiZWExOTJjNzFhYjMwMGNlMTViMGYzYzk5IiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
   "state": {
     "status": "success",
     "error_type": null,
-    "retry_count": 1,
-    "amount_usdc": 0.25,
-    "target_url": "http://127.0.0.1:18083/api/reports/coinbase",
+    "retry_count": 0,
+    "amount_usdc": 5.0,
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
     "selected_accept": {
       "network": "base",
       "asset": "USDC",
       "decimals": 6,
-      "amount": "250000",
-      "to": "0x3333333333333333333333333333333333333333",
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
       "chainId": 8453,
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
@@ -1662,7 +990,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499572
+  "timestamp": 1767509659
 }
 ```
 

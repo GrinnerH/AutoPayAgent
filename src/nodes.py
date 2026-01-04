@@ -122,6 +122,21 @@ def intent_router(state: AgentState) -> AgentState:
         _debug("intent_router: invoking LLM")
         history = list(state.get("messages", []))
         result, messages, raw_result = llm.intent(history, task_text, state.get("thread_id"))
+        # 根据"is_payment_task"判断是否为付费任务
+        # {
+        #   "constraints": {
+        #     "format": "downloadable_report",
+        #     "paid_required": true
+        #   },
+        #   "is_payment_task": true,
+        #   "query_params": {
+        #     "industry": "web3",
+        #     "language": "chinese",
+        #     "report_type": "market_research"
+        #   },
+        #   "service_query": "web3 market research report download",
+        #   "service_type": "market_research"
+        # }
         _debug("intent_router: LLM done")
         updates["intent"] = result.model_dump()
         updates["messages"] = messages
@@ -316,11 +331,6 @@ def request_executor(state: AgentState) -> AgentState:
     if ctx.get("signed_payload"):
         headers["PAYMENT-SIGNATURE"] = ctx["signed_payload"]
         updates["payment_ctx"] = {"status": "submitted"}
-    if ctx.get("simulate_verification_failure"):
-        headers["X-MOCK-VERIFY-FAIL-ONCE"] = "1"
-        thread_id = state.get("thread_id")
-        if thread_id:
-            headers["X-CLIENT-ID"] = str(thread_id)
     if ctx.get("target_url"):
         updates["risk_flags"] = parse_service_identity(ctx["target_url"])
 

@@ -112,7 +112,7 @@ def run_demo_1():
     config, graph, llm_bundle = _build_graph()
     print("Demo-1 场景：意图识别与分流（非支付任务）")
     state = default_state(config=config.__dict__, task_text="帮我概括这段文字：这是一个关于区块链的入门介绍。")
-    state["wallet_balance"] = 10.0
+    state["wallet_balance"] = 0.2
     try:
         _init_md_log("demo-1")
         result = _invoke_with_interrupts(graph, state, "demo-1", auto_approve=True)

@@ -173,7 +173,8 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
             "You are a payment reflection agent. "
             "Explain failures and propose the next action. "
             "Allowed actions: retry_request, reselect_accept, human_approval, abort. "
-            "Use retry_request for transient verification failures when retry_count is low."
+            "Use retry_request for transient verification failures when retry_count is low. "
+            "If error_type is insufficient_balance and retry_count is low, propose retry_request and note that a balance refresh is needed."
         ),
         response_format=ToolStrategy(ReflectionOutput),
     )
