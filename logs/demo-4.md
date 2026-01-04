@@ -4,7 +4,7 @@
 
 - status: success
 - error_type: None
-- intent: {"is_payment_task": true, "service_type": "market_research", "service_query": "web3 market research report download", "query_params": {"industry": "web3", "report_type": "market_research", "language": "chinese"}, "constraints": {"paid_required": true, "format": "downloadable", "content_type": "report"}}
+- intent: {"is_payment_task": true, "service_type": "market_research", "service_query": "web3 market research report download", "query_params": {"industry": "web3", "report_type": "market_research", "language": "chinese"}, "constraints": {"paid_required": true, "format": "downloadable_report"}}
 - selected_service: {"name": "Mock Market Intel", "service_type": "market_report", "url": "http://127.0.0.1:18082/api/reports/coinbase", "http_method": "GET", "supports_x402": true, "reputation": "ok", "whitelist_tag": false, "description": "Paid deep research report with analysis and charts.", "supports_retry": false, "headers": {}, "body": null}
 
 ## Node Trace
@@ -29,8 +29,7 @@
       },
       "constraints": {
         "paid_required": true,
-        "format": "downloadable",
-        "content_type": "report"
+        "format": "downloadable_report"
       }
     },
     "messages": [
@@ -48,12 +47,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report'}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -73,8 +72,7 @@
     },
     "constraints": {
       "paid_required": true,
-      "format": "downloadable",
-      "content_type": "report"
+      "format": "downloadable_report"
     }
   },
   "state": {
@@ -90,7 +88,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -138,11 +136,10 @@
     },
     "constraints": {
       "paid_required": true,
-      "format": "downloadable",
-      "content_type": "report"
+      "format": "downloadable_report"
     }
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -187,7 +184,7 @@
     "structured_response": {
       "selected_index": 1,
       "service_name": "Mock Market Intel",
-      "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all."
+      "reason": "This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space."
     },
     "messages": [
       {
@@ -199,7 +196,7 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report'}",
         "additional_kwargs": {}
       },
       {
@@ -216,12 +213,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -232,7 +229,7 @@
   "event": "service_select",
   "selected_index": 1,
   "service_name": "Mock Market Intel",
-  "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all.",
+  "reason": "This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -246,7 +243,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -270,8 +267,7 @@
       },
       "constraints": {
         "paid_required": true,
-        "format": "downloadable",
-        "content_type": "report"
+        "format": "downloadable_report"
       }
     },
     "messages": [
@@ -289,12 +285,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report'}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -314,8 +310,7 @@
     },
     "constraints": {
       "paid_required": true,
-      "format": "downloadable",
-      "content_type": "report"
+      "format": "downloadable_report"
     }
   },
   "state": {
@@ -331,7 +326,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -379,11 +374,10 @@
     },
     "constraints": {
       "paid_required": true,
-      "format": "downloadable",
-      "content_type": "report"
+      "format": "downloadable_report"
     }
   },
-  "timestamp": 1767500840
+  "timestamp": 1767517193
 }
 ```
 
@@ -428,7 +422,7 @@
     "structured_response": {
       "selected_index": 1,
       "service_name": "Mock Market Intel",
-      "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all."
+      "reason": "This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space."
     },
     "messages": [
       {
@@ -440,7 +434,7 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report'}",
         "additional_kwargs": {}
       },
       {
@@ -457,12 +451,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -473,7 +467,7 @@
   "event": "service_select",
   "selected_index": 1,
   "service_name": "Mock Market Intel",
-  "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all.",
+  "reason": "This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -487,7 +481,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -511,7 +505,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -538,7 +532,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -588,7 +582,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500847
+  "timestamp": 1767517200
 }
 ```
 
@@ -640,7 +634,7 @@
   "output": {
     "structured_response": {
       "selected_index": 0,
-      "reason": "I recommend accepting the first option (5.0 USDC) for the following reasons:\n\n1. **Cost Efficiency**: The first option costs 5.0 USDC while the second option costs 5.025 USDC for \"priority settlement.\" The 0.025 USDC premium (0.5% increase) for priority settlement doesn't seem justified for a market research report download.\n\n2. **Wallet Balance**: The user has 10.0 USDC in their wallet, so both options are affordable, but there's no need to pay extra for priority settlement on what appears to be a standard report download.\n\n3. **Risk Assessment**: The service has risk flags including an untrusted domain (127.0.0.1) and HTTP scheme. Given these security concerns, it's prudent to minimize the payment amount rather than pay extra for priority features.\n\n4. **Service Nature**: For a market research report download, standard settlement should be sufficient. There's no indication that immediate delivery is critical enough to warrant the premium.\n\n5. **Payment Scheme**: Both options use the 'exact' scheme which matches the user's preference, so there's no functional difference in payment method.\n\nThe first option provides the same core service at a lower cost, which is the rational choice given the circumstances.",
+      "reason": "Selected the standard 5.0 USDC payment option over the 5.025 USDC priority settlement. The wallet balance of 10.0 USDC is sufficient for either option. The standard option saves 0.025 USDC (approximately $0.025) while still meeting the service requirements. The priority settlement offers minimal benefit for this market research report download, and the domain is not trusted (127.0.0.1), so there's no urgency to pay extra for priority processing. The exact scheme preference is satisfied by both options.",
       "policy_decision": "auto"
     },
     "messages": [
@@ -653,7 +647,7 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+        "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable_report'}",
         "additional_kwargs": {}
       },
       {
@@ -665,7 +659,7 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+        "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason=\"This service matches the user's requirements for a paid market research report. While it's specifically for Coinbase reports rather than general web3 market research, it's the closest match among available services. The service supports x402 payments and provides deep research reports with analysis and charts, which aligns with the user's need for downloadable market research reports in the web3/crypto space.\"",
         "additional_kwargs": {}
       },
       {
@@ -694,12 +688,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 reason='I recommend accepting the first option (5.0 USDC) for the following reasons:\\n\\n1. **Cost Efficiency**: The first option costs 5.0 USDC while the second option costs 5.025 USDC for \"priority settlement.\" The 0.025 USDC premium (0.5% increase) for priority settlement doesn\\'t seem justified for a market research report download.\\n\\n2. **Wallet Balance**: The user has 10.0 USDC in their wallet, so both options are affordable, but there\\'s no need to pay extra for priority settlement on what appears to be a standard report download.\\n\\n3. **Risk Assessment**: The service has risk flags including an untrusted domain (127.0.0.1) and HTTP scheme. Given these security concerns, it\\'s prudent to minimize the payment amount rather than pay extra for priority features.\\n\\n4. **Service Nature**: For a market research report download, standard settlement should be sufficient. There\\'s no indication that immediate delivery is critical enough to warrant the premium.\\n\\n5. **Payment Scheme**: Both options use the \\'exact\\' scheme which matches the user\\'s preference, so there\\'s no functional difference in payment method.\\n\\nThe first option provides the same core service at a lower cost, which is the rational choice given the circumstances.' policy_decision='auto'",
+        "content": "Returning structured response: selected_index=0 reason=\"Selected the standard 5.0 USDC payment option over the 5.025 USDC priority settlement. The wallet balance of 10.0 USDC is sufficient for either option. The standard option saves 0.025 USDC (approximately $0.025) while still meeting the service requirements. The priority settlement offers minimal benefit for this market research report download, and the domain is not trusted (127.0.0.1), so there's no urgency to pay extra for priority processing. The exact scheme preference is satisfied by both options.\" policy_decision='auto'",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -736,7 +730,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -778,7 +772,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -824,7 +818,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -837,12 +831,12 @@
   "asset": "USDC",
   "amount_usdc": 5.0,
   "authorization": {
-    "from": "0x71fd235096D27888ab6Beb4F40C4C59f4A061dF6",
+    "from": "0x3dDca6c88F7cec9B8314430A71A03322715acF42",
     "to": "0x2222222222222222222222222222222222222222",
     "value": "5000000",
     "validAfter": 0,
-    "validBefore": 1767504460,
-    "nonce": "0x41079fb3f9939276cc66ce826e275ad70b7d5a43ca932c83b46c6a8f9cafe73b"
+    "validBefore": 1767520809,
+    "nonce": "0x40a536e18d289018cf4a0f5bc81f377514f285dd5fc582afb9522c4b27162719"
   },
   "domain": {
     "name": "USD Coin",
@@ -918,7 +912,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -954,7 +948,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 
@@ -966,8 +960,8 @@
   "amount_usdc": 5.0,
   "payee": "0x2222222222222222222222222222222222222222",
   "network": "base",
-  "tx_hash": "0xb59eb8533f84d7111dad6cfcec298145a00bc752c41692edf6a2bae5802aa043",
-  "receipt_raw": "eyJ0eEhhc2giOiAiMHhiNTllYjg1MzNmODRkNzExMWRhZDZjZmNlYzI5ODE0NWEwMGJjNzUyYzQxNjkyZWRmNmEyYmFlNTgwMmFhMDQzIiwgInNldHRsZW1lbnRJZCI6ICJlOTc2ZTJkZmFjNmVlY2QwMGJjZjRlNmZkMDk3NGNkYmFlMzNjZTE3ZjJjY2M1NWYzZDViZmU0MmQ0NWE0ODdkIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+  "tx_hash": "0xf5d6971f15bea0ea6642fb183994354a03a59745502360a6d91f4f784ffc05e7",
+  "receipt_raw": "eyJ0eEhhc2giOiAiMHhmNWQ2OTcxZjE1YmVhMGVhNjY0MmZiMTgzOTk0MzU0YTAzYTU5NzQ1NTAyMzYwYTZkOTFmNGY3ODRmZmMwNWU3IiwgInNldHRsZW1lbnRJZCI6ICJiMTcyMjg0N2Y5NDBiOTYwZmI0Mzk0OTBiMDIzYTU5OTI0NDNhZDFiNTg0MjQ2MWY5ZjRkOWQ1OTU3MjAzMTFjIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
   "state": {
     "status": "success",
     "error_type": null,
@@ -990,7 +984,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767500860
+  "timestamp": 1767517209
 }
 ```
 

@@ -111,7 +111,7 @@ def run_demo_1():
     ensure_services_started()
     config, graph, llm_bundle = _build_graph()
     print("Demo-1 场景：意图识别与分流（非支付任务）")
-    state = default_state(config=config.__dict__, task_text="帮我概括这段文字：这是一个关于区块链的入门介绍。")
+    state = default_state(config=config.__dict__, task_text="请你简单介绍一下x402协议")
     state["wallet_balance"] = 0.2
     try:
         _init_md_log("demo-1")
@@ -179,8 +179,7 @@ def run_demo_5():
         config=config.__dict__,
         task_text="下载一份web3行业的市场研究报告",
     )
-    state["payment_ctx"]["simulate_verification_failure"] = True
-    state["wallet_balance"] = 10.0
+    state["wallet_balance"] = 0.02
     try:
         _init_md_log("demo-5")
         result = _invoke_with_interrupts(graph, state, "demo-5", auto_approve=True)

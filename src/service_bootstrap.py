@@ -17,6 +17,10 @@ def _start_facilitator() -> Optional[threading.Thread]:
     facilitator_host = os.getenv("FACILITATOR_HOST", "127.0.0.1")
     facilitator_port = int(os.getenv("FACILITATOR_PORT", "9000"))
     base_url = f"http://{facilitator_host}:{facilitator_port}"
+    def _port_in_use(host: str, port: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.2)
+            return sock.connect_ex((host, port)) == 0
     try:
         resp = httpx.get(f"{base_url}/openapi.json", timeout=1.0)
         if resp.status_code == 200:
@@ -24,6 +28,9 @@ def _start_facilitator() -> Optional[threading.Thread]:
             return None
     except httpx.HTTPError:
         pass
+    if _port_in_use(facilitator_host, facilitator_port):
+        os.environ.setdefault("FACILITATOR_URL", base_url)
+        return None
 
     thread = threading.Thread(
         target=uvicorn.run,

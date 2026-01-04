@@ -4,7 +4,7 @@
 
 - status: success
 - error_type: None
-- intent: {"is_payment_task": true, "service_type": "weather", "service_query": "新加坡天气查询", "query_params": {"location": "新加坡", "language": "zh"}, "constraints": {"paid_required": false}}
+- intent: {"is_payment_task": true, "service_type": "weather", "service_query": "weather forecast Singapore", "query_params": {"location": "新加坡"}, "constraints": {"paid_required": false}}
 - selected_service: {"name": "Mock Weather Free", "service_type": "weather", "url": "http://127.0.0.1:18080/api/weather-free", "http_method": "GET", "supports_x402": false, "reputation": "ok", "whitelist_tag": true, "description": "Free weather: only today's temperature snapshot (no hourly or rainfall).", "supports_retry": false, "headers": {}, "body": null}
 
 ## Node Trace
@@ -21,10 +21,9 @@
     "structured_response": {
       "is_payment_task": true,
       "service_type": "weather",
-      "service_query": "新加坡天气查询",
+      "service_query": "weather forecast Singapore",
       "query_params": {
-        "location": "新加坡",
-        "language": "zh"
+        "location": "新加坡"
       },
       "constraints": {
         "paid_required": false
@@ -45,12 +44,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={'paid_required': False}",
+        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='weather forecast Singapore' query_params={'location': '新加坡'} constraints={'paid_required': False}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -62,10 +61,9 @@
   "intent": {
     "is_payment_task": true,
     "service_type": "weather",
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "query_params": {
-      "location": "新加坡",
-      "language": "zh"
+      "location": "新加坡"
     },
     "constraints": {
       "paid_required": false
@@ -84,7 +82,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -124,16 +122,15 @@
   "intent": {
     "is_payment_task": true,
     "service_type": "weather",
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "query_params": {
-      "location": "新加坡",
-      "language": "zh"
+      "location": "新加坡"
     },
     "constraints": {
       "paid_required": false
     }
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -143,7 +140,7 @@
 {
   "event": "llm_service_select",
   "input": {
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "service_type": "weather",
     "candidates": [
       {
@@ -178,7 +175,7 @@
     "structured_response": {
       "selected_index": 0,
       "service_name": "Mock Weather Free",
-      "reason": "用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。"
+      "reason": "The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested."
     },
     "messages": [
       {
@@ -190,12 +187,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={'paid_required': False}",
+        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='weather forecast Singapore' query_params={'location': '新加坡'} constraints={'paid_required': False}",
         "additional_kwargs": {}
       },
       {
         "type": "human",
-        "content": "{'service_query': '新加坡天气查询', 'service_type': 'weather', 'candidates': [{'name': 'Mock Weather Free', 'service_type': 'weather', 'url': 'http://127.0.0.1:18080/api/weather-free', 'http_method': 'GET', 'supports_x402': False, 'reputation': 'ok', 'whitelist_tag': True, 'description': \"Free weather: only today's temperature snapshot (no hourly or rainfall).\", 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
+        "content": "{'service_query': 'weather forecast Singapore', 'service_type': 'weather', 'candidates': [{'name': 'Mock Weather Free', 'service_type': 'weather', 'url': 'http://127.0.0.1:18080/api/weather-free', 'http_method': 'GET', 'supports_x402': False, 'reputation': 'ok', 'whitelist_tag': True, 'description': \"Free weather: only today's temperature snapshot (no hourly or rainfall).\", 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
         "additional_kwargs": {}
       },
       {
@@ -207,12 +204,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Weather Free' reason='用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。'",
+        "content": "Returning structured response: selected_index=0 service_name='Mock Weather Free' reason=\"The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517141
 }
 ```
 
@@ -223,7 +220,7 @@
   "event": "service_select",
   "selected_index": 0,
   "service_name": "Mock Weather Free",
-  "reason": "用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。",
+  "reason": "The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -237,7 +234,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517141
 }
 ```
 
@@ -253,10 +250,9 @@
     "structured_response": {
       "is_payment_task": true,
       "service_type": "weather",
-      "service_query": "新加坡天气查询",
+      "service_query": "weather forecast Singapore",
       "query_params": {
-        "location": "新加坡",
-        "language": "zh"
+        "location": "新加坡"
       },
       "constraints": {
         "paid_required": false
@@ -277,12 +273,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={'paid_required': False}",
+        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='weather forecast Singapore' query_params={'location': '新加坡'} constraints={'paid_required': False}",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -294,10 +290,9 @@
   "intent": {
     "is_payment_task": true,
     "service_type": "weather",
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "query_params": {
-      "location": "新加坡",
-      "language": "zh"
+      "location": "新加坡"
     },
     "constraints": {
       "paid_required": false
@@ -316,7 +311,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -356,16 +351,15 @@
   "intent": {
     "is_payment_task": true,
     "service_type": "weather",
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "query_params": {
-      "location": "新加坡",
-      "language": "zh"
+      "location": "新加坡"
     },
     "constraints": {
       "paid_required": false
     }
   },
-  "timestamp": 1767499467
+  "timestamp": 1767517135
 }
 ```
 
@@ -375,7 +369,7 @@
 {
   "event": "llm_service_select",
   "input": {
-    "service_query": "新加坡天气查询",
+    "service_query": "weather forecast Singapore",
     "service_type": "weather",
     "candidates": [
       {
@@ -410,7 +404,7 @@
     "structured_response": {
       "selected_index": 0,
       "service_name": "Mock Weather Free",
-      "reason": "用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。"
+      "reason": "The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested."
     },
     "messages": [
       {
@@ -422,12 +416,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='新加坡天气查询' query_params={'location': '新加坡', 'language': 'zh'} constraints={'paid_required': False}",
+        "content": "Returning structured response: is_payment_task=True service_type='weather' service_query='weather forecast Singapore' query_params={'location': '新加坡'} constraints={'paid_required': False}",
         "additional_kwargs": {}
       },
       {
         "type": "human",
-        "content": "{'service_query': '新加坡天气查询', 'service_type': 'weather', 'candidates': [{'name': 'Mock Weather Free', 'service_type': 'weather', 'url': 'http://127.0.0.1:18080/api/weather-free', 'http_method': 'GET', 'supports_x402': False, 'reputation': 'ok', 'whitelist_tag': True, 'description': \"Free weather: only today's temperature snapshot (no hourly or rainfall).\", 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
+        "content": "{'service_query': 'weather forecast Singapore', 'service_type': 'weather', 'candidates': [{'name': 'Mock Weather Free', 'service_type': 'weather', 'url': 'http://127.0.0.1:18080/api/weather-free', 'http_method': 'GET', 'supports_x402': False, 'reputation': 'ok', 'whitelist_tag': True, 'description': \"Free weather: only today's temperature snapshot (no hourly or rainfall).\", 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
         "additional_kwargs": {}
       },
       {
@@ -439,12 +433,12 @@
       },
       {
         "type": "tool",
-        "content": "Returning structured response: selected_index=0 service_name='Mock Weather Free' reason='用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。'",
+        "content": "Returning structured response: selected_index=0 service_name='Mock Weather Free' reason=\"The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested.\"",
         "additional_kwargs": {}
       }
     ]
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517141
 }
 ```
 
@@ -455,7 +449,7 @@
   "event": "service_select",
   "selected_index": 0,
   "service_name": "Mock Weather Free",
-  "reason": "用户需要查询新加坡天气，且明确要求免费服务。Mock Weather Free 服务完全免费，提供今日温度快照，虽然功能比付费版简单（没有小时数据和降雨指标），但能满足基本的天气查询需求。Mock Weather Pro 是付费服务，不符合用户的免费要求。因此选择 Mock Weather Free 作为最佳匹配。",
+  "reason": "The user requested weather information for Singapore with a preference for free services. Mock Weather Free is a free service that provides today's temperature snapshot, which satisfies the basic weather information need. Although it doesn't provide hourly or rainfall data like the paid Mock Weather Pro, it meets the user's constraint of preferring free services when they satisfy the task. The free service provides the essential temperature information requested.",
   "state": {
     "status": "idle",
     "error_type": null,
@@ -469,7 +463,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517141
 }
 ```
 
@@ -496,7 +490,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517142
 }
 ```
 
@@ -523,7 +517,7 @@
     "budget_limit": 5.0,
     "auto_approve_threshold": 1.0
   },
-  "timestamp": 1767499473
+  "timestamp": 1767517142
 }
 ```
 
