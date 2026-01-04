@@ -11,14 +11,16 @@
         "structured_response": {
           "is_payment_task": true,
           "service_type": "weather_data",
-          "service_query": "Singapore real-time rainfall weather data",
+          "service_query": "Singapore real-time rainfall weather data API",
           "query_params": {
             "location": "Singapore",
             "data_type": "rainfall",
             "timeframe": "real-time"
           },
           "constraints": {
-            "paid_required": true
+            "paid_required": true,
+            "location_specific": true,
+            "real_time_data": true
           }
         },
         "messages": [
@@ -36,26 +38,28 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True}",
+            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
             "additional_kwargs": {}
           }
         ]
       },
-      "timestamp": 1767491181
+      "timestamp": 1767493083
     },
     {
       "event": "intent",
       "intent": {
         "is_payment_task": true,
         "service_type": "weather_data",
-        "service_query": "Singapore real-time rainfall weather data",
+        "service_query": "Singapore real-time rainfall weather data API",
         "query_params": {
           "location": "Singapore",
           "data_type": "rainfall",
           "timeframe": "real-time"
         },
         "constraints": {
-          "paid_required": true
+          "paid_required": true,
+          "location_specific": true,
+          "real_time_data": true
         }
       },
       "state": {
@@ -68,7 +72,7 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491181
+      "timestamp": 1767493083
     },
     {
       "event": "discovery",
@@ -113,22 +117,24 @@
       "intent": {
         "is_payment_task": true,
         "service_type": "weather_data",
-        "service_query": "Singapore real-time rainfall weather data",
+        "service_query": "Singapore real-time rainfall weather data API",
         "query_params": {
           "location": "Singapore",
           "data_type": "rainfall",
           "timeframe": "real-time"
         },
         "constraints": {
-          "paid_required": true
+          "paid_required": true,
+          "location_specific": true,
+          "real_time_data": true
         }
       },
-      "timestamp": 1767491181
+      "timestamp": 1767493083
     },
     {
       "event": "llm_service_select",
       "input": {
-        "service_query": "Singapore real-time rainfall weather data",
+        "service_query": "Singapore real-time rainfall weather data API",
         "service_type": "weather_data",
         "candidates": [
           {
@@ -173,7 +179,7 @@
         "structured_response": {
           "selected_index": 0,
           "service_name": "Mock Weather Pro",
-          "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the requested service type (weather_data). The user specifically requested real-time rainfall data for Singapore, and this weather service is capable of providing weather data. It supports x402 payments which is required since the task has paid_required constraint. The other services are market report services which don't match the weather data requirement."
+          "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement."
         },
         "messages": [
           {
@@ -185,12 +191,12 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True}",
+            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
             "additional_kwargs": {}
           },
           {
             "type": "human",
-            "content": "{'service_query': 'Singapore real-time rainfall weather data', 'service_type': 'weather_data', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel Retry', 'service_type': 'market_report_retry', 'url': 'http://127.0.0.1:18083/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': True, 'headers': {}, 'body': None}]}",
+            "content": "{'service_query': 'Singapore real-time rainfall weather data API', 'service_type': 'weather_data', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel Retry', 'service_type': 'market_report_retry', 'url': 'http://127.0.0.1:18083/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': True, 'headers': {}, 'body': None}]}",
             "additional_kwargs": {}
           },
           {
@@ -202,18 +208,18 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the requested service type (weather_data). The user specifically requested real-time rainfall data for Singapore, and this weather service is capable of providing weather data. It supports x402 payments which is required since the task has paid_required constraint. The other services are market report services which don't match the weather data requirement.\"",
+            "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.\"",
             "additional_kwargs": {}
           }
         ]
       },
-      "timestamp": 1767491188
+      "timestamp": 1767493088
     },
     {
       "event": "service_select",
       "selected_index": 0,
       "service_name": "Mock Weather Pro",
-      "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the requested service type (weather_data). The user specifically requested real-time rainfall data for Singapore, and this weather service is capable of providing weather data. It supports x402 payments which is required since the task has paid_required constraint. The other services are market report services which don't match the weather data requirement.",
+      "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.",
       "state": {
         "status": "idle",
         "error_type": null,
@@ -224,7 +230,237 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491188
+      "timestamp": 1767493088
+    },
+    {
+      "event": "llm_intent",
+      "input": {
+        "task_text": "查询新加坡实时降雨量（使用付费服务）"
+      },
+      "output": {
+        "structured_response": {
+          "is_payment_task": true,
+          "service_type": "weather_data",
+          "service_query": "Singapore real-time rainfall weather data API",
+          "query_params": {
+            "location": "Singapore",
+            "data_type": "rainfall",
+            "timeframe": "real-time"
+          },
+          "constraints": {
+            "paid_required": true,
+            "location_specific": true,
+            "real_time_data": true
+          }
+        },
+        "messages": [
+          {
+            "type": "human",
+            "content": "查询新加坡实时降雨量（使用付费服务）",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767493083
+    },
+    {
+      "event": "intent",
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "weather_data",
+        "service_query": "Singapore real-time rainfall weather data API",
+        "query_params": {
+          "location": "Singapore",
+          "data_type": "rainfall",
+          "timeframe": "real-time"
+        },
+        "constraints": {
+          "paid_required": true,
+          "location_specific": true,
+          "real_time_data": true
+        }
+      },
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false
+      },
+      "timestamp": 1767493083
+    },
+    {
+      "event": "discovery",
+      "candidates": [
+        {
+          "name": "Mock Weather Pro",
+          "service_type": "weather",
+          "url": "http://127.0.0.1:18081/api/weather",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": true,
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        },
+        {
+          "name": "Mock Market Intel",
+          "service_type": "market_report",
+          "url": "http://127.0.0.1:18082/api/reports/coinbase",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": false,
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        },
+        {
+          "name": "Mock Market Intel Retry",
+          "service_type": "market_report_retry",
+          "url": "http://127.0.0.1:18083/api/reports/coinbase",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": false,
+          "supports_retry": true,
+          "headers": {},
+          "body": null
+        }
+      ],
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "weather_data",
+        "service_query": "Singapore real-time rainfall weather data API",
+        "query_params": {
+          "location": "Singapore",
+          "data_type": "rainfall",
+          "timeframe": "real-time"
+        },
+        "constraints": {
+          "paid_required": true,
+          "location_specific": true,
+          "real_time_data": true
+        }
+      },
+      "timestamp": 1767493083
+    },
+    {
+      "event": "llm_service_select",
+      "input": {
+        "service_query": "Singapore real-time rainfall weather data API",
+        "service_type": "weather_data",
+        "candidates": [
+          {
+            "name": "Mock Weather Pro",
+            "service_type": "weather",
+            "url": "http://127.0.0.1:18081/api/weather",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": true,
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          },
+          {
+            "name": "Mock Market Intel",
+            "service_type": "market_report",
+            "url": "http://127.0.0.1:18082/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": false,
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          },
+          {
+            "name": "Mock Market Intel Retry",
+            "service_type": "market_report_retry",
+            "url": "http://127.0.0.1:18083/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": false,
+            "supports_retry": true,
+            "headers": {},
+            "body": null
+          }
+        ]
+      },
+      "output": {
+        "structured_response": {
+          "selected_index": 0,
+          "service_name": "Mock Weather Pro",
+          "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement."
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "{'service_query': 'Singapore real-time rainfall weather data API', 'service_type': 'weather_data', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel Retry', 'service_type': 'market_report_retry', 'url': 'http://127.0.0.1:18083/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'supports_retry': True, 'headers': {}, 'body': None}]}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.\"",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767493088
+    },
+    {
+      "event": "service_select",
+      "selected_index": 0,
+      "service_name": "Mock Weather Pro",
+      "reason": "Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.",
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false
+      },
+      "timestamp": 1767493088
     },
     {
       "event": "payment_required",
@@ -240,7 +476,7 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491188
+      "timestamp": 1767493088
     },
     {
       "event": "request_executor",
@@ -259,7 +495,7 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491188
+      "timestamp": 1767493088
     },
     {
       "event": "header_parser",
@@ -301,7 +537,7 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491188
+      "timestamp": 1767493088
     },
     {
       "event": "llm_negotiation",
@@ -346,7 +582,7 @@
       "output": {
         "structured_response": {
           "selected_index": 0,
-          "reason": "Selected the first option (50,000 USDC) because it's the lower cost option and fits within the wallet balance constraints. The wallet has 10.0 USDC, which is insufficient for either option, but the negotiation system should select the more affordable option. The second option at 75,000 USDC is even more expensive. Both options use the Base network with USDC, which matches the user's preferences. The priority settlement note on the second option doesn't justify the 50% higher cost for the same service.",
+          "reason": "Selected the first option (50,000 USDC) because it's the lower cost option and matches the user's preferences for Base network, USDC asset, and exact scheme. The wallet balance of 10.0 is insufficient for either option, but the agent should select the more affordable option when both exceed available funds. The second option at 75,000 USDC is 50% more expensive for \"priority settlement\" which doesn't appear necessary for basic weather data access. The service domain is trusted (127.0.0.1 with domain_trusted: True), so there are no security concerns.",
           "policy_decision": "auto"
         },
         "messages": [
@@ -359,7 +595,7 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True}",
+            "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
             "additional_kwargs": {}
           },
           {
@@ -371,7 +607,7 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the requested service type (weather_data). The user specifically requested real-time rainfall data for Singapore, and this weather service is capable of providing weather data. It supports x402 payments which is required since the task has paid_required constraint. The other services are market report services which don't match the weather data requirement.\"",
+            "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.\"",
             "additional_kwargs": {}
           },
           {
@@ -400,12 +636,12 @@
           },
           {
             "type": "tool",
-            "content": "Returning structured response: selected_index=0 reason=\"Selected the first option (50,000 USDC) because it's the lower cost option and fits within the wallet balance constraints. The wallet has 10.0 USDC, which is insufficient for either option, but the negotiation system should select the more affordable option. The second option at 75,000 USDC is even more expensive. Both options use the Base network with USDC, which matches the user's preferences. The priority settlement note on the second option doesn't justify the 50% higher cost for the same service.\" policy_decision='auto'",
+            "content": "Returning structured response: selected_index=0 reason='Selected the first option (50,000 USDC) because it\\'s the lower cost option and matches the user\\'s preferences for Base network, USDC asset, and exact scheme. The wallet balance of 10.0 is insufficient for either option, but the agent should select the more affordable option when both exceed available funds. The second option at 75,000 USDC is 50% more expensive for \"priority settlement\" which doesn\\'t appear necessary for basic weather data access. The service domain is trusted (127.0.0.1 with domain_trusted: True), so there are no security concerns.' policy_decision='auto'",
             "additional_kwargs": {}
           }
         ]
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     },
     {
       "event": "negotiation",
@@ -434,7 +670,7 @@
         "policy_decision": null,
         "human_approval_required": false
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     },
     {
       "event": "policy",
@@ -466,7 +702,7 @@
         "policy_decision": "auto",
         "human_approval_required": false
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     },
     {
       "event": "payment_signer",
@@ -474,12 +710,12 @@
       "asset": "USDC",
       "amount_usdc": 0.05,
       "authorization": {
-        "from": "0x10B79220aDb96AC391D68A467bb02EebD0e9EE65",
+        "from": "0x552DF87dA656119Ab64ec95b4c902505CE8763c0",
         "to": "0x1111111111111111111111111111111111111111",
         "value": "50000",
         "validAfter": 0,
-        "validBefore": 1767494797,
-        "nonce": "0x5637278a3e7c0bfcbbc559c810097000bc56550cdf212e6291ad11855acdee15"
+        "validBefore": 1767496700,
+        "nonce": "0x63796e073a4932361f397e46f12508a0f146de7abd4a3bf2fdc48d9f2b07c92d"
       },
       "domain": {
         "name": "USD Coin",
@@ -552,7 +788,7 @@
         "policy_decision": "auto",
         "human_approval_required": false
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     },
     {
       "event": "request_executor",
@@ -580,15 +816,15 @@
         "policy_decision": "auto",
         "human_approval_required": false
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     },
     {
       "event": "response_validator",
       "amount_usdc": 0.05,
       "payee": "0x1111111111111111111111111111111111111111",
       "network": "base",
-      "tx_hash": "0x2f36f3d780c664a1053e20415c20c2164129069e7c43bfd624029cbc289474ec",
-      "receipt_raw": "eyJ0eEhhc2giOiAiMHgyZjM2ZjNkNzgwYzY2NGExMDUzZTIwNDE1YzIwYzIxNjQxMjkwNjllN2M0M2JmZDYyNDAyOWNiYzI4OTQ3NGVjIiwgInNldHRsZW1lbnRJZCI6ICI4NTg1NTY4ZTI5ZTJjMDNmZjU4ZjQyYjgwNzNhOTdmODM1NjJkOTJlZTBjMTJmOWJkNTE4YmU0MDYxNTZiMjdmIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+      "tx_hash": "0xed6e09c1249e438c16d3a2dd75357a5a943b1a797bc1e1990099446cba310dee",
+      "receipt_raw": "eyJ0eEhhc2giOiAiMHhlZDZlMDljMTI0OWU0MzhjMTZkM2EyZGQ3NTM1N2E1YTk0M2IxYTc5N2JjMWUxOTkwMDk5NDQ2Y2JhMzEwZGVlIiwgInNldHRsZW1lbnRJZCI6ICIyYTgyNzUxNzBkY2UxMTU2YzUyMzQ4ZThkYjQxODRlMzM5YTExMjI4NGNiM2ZhN2U5MGFiYWViYzkzOTgxYTI1IiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
       "state": {
         "status": "success",
         "error_type": null,
@@ -608,20 +844,22 @@
         "policy_decision": "auto",
         "human_approval_required": false
       },
-      "timestamp": 1767491197
+      "timestamp": 1767493100
     }
   ],
   "intent": {
     "is_payment_task": true,
     "service_type": "weather_data",
-    "service_query": "Singapore real-time rainfall weather data",
+    "service_query": "Singapore real-time rainfall weather data API",
     "query_params": {
       "location": "Singapore",
       "data_type": "rainfall",
       "timeframe": "real-time"
     },
     "constraints": {
-      "paid_required": true
+      "paid_required": true,
+      "location_specific": true,
+      "real_time_data": true
     }
   },
   "selected_service": {
@@ -688,15 +926,15 @@
       "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       "scheme": "exact"
     },
-    "signed_payload": "eyJ4NDAyVmVyc2lvbiI6ICIxLjAiLCAic2NoZW1lIjogImV4YWN0IiwgIm5ldHdvcmsiOiAiYmFzZSIsICJwYXlsb2FkIjogeyJzaWduYXR1cmUiOiAiZDNhMGViYzVkNWIzOGEwMWY0YmEwYWY4N2IyNWE4MzM2MTAzNjBmNTMzN2EzNGRmZWRmYzkzMmI4MDMxMGQ2MzQyODhjYjQwY2NhZDY0ZjkwNmJhMDYyNTcxZTI1MDg0ZDVlNDc3MWI3ODY3OGU4YmRjY2VkNmY0NDg2ZTFiMDYxYyIsICJhdXRob3JpemF0aW9uIjogeyJmcm9tIjogIjB4MTBCNzkyMjBhRGI5NkFDMzkxRDY4QTQ2N2JiMDJFZWJEMGU5RUU2NSIsICJ0byI6ICIweDExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTEiLCAidmFsdWUiOiAiNTAwMDAiLCAidmFsaWRBZnRlciI6IDAsICJ2YWxpZEJlZm9yZSI6IDE3Njc0OTQ3OTcsICJub25jZSI6ICIweDU2MzcyNzhhM2U3YzBiZmNiYmM1NTljODEwMDk3MDAwYmM1NjU1MGNkZjIxMmU2MjkxYWQxMTg1NWFjZGVlMTUifSwgImRvbWFpbiI6IHsibmFtZSI6ICJVU0QgQ29pbiIsICJ2ZXJzaW9uIjogIjIiLCAiY2hhaW5JZCI6IDg0NTMsICJ2ZXJpZnlpbmdDb250cmFjdCI6ICIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMifSwgInR5cGVzIjogeyJFSVA3MTJEb21haW4iOiBbeyJuYW1lIjogIm5hbWUiLCAidHlwZSI6ICJzdHJpbmcifSwgeyJuYW1lIjogInZlcnNpb24iLCAidHlwZSI6ICJzdHJpbmcifSwgeyJuYW1lIjogImNoYWluSWQiLCAidHlwZSI6ICJ1aW50MjU2In0sIHsibmFtZSI6ICJ2ZXJpZnlpbmdDb250cmFjdCIsICJ0eXBlIjogImFkZHJlc3MifV0sICJUcmFuc2ZlcldpdGhBdXRob3JpemF0aW9uIjogW3sibmFtZSI6ICJmcm9tIiwgInR5cGUiOiAiYWRkcmVzcyJ9LCB7Im5hbWUiOiAidG8iLCAidHlwZSI6ICJhZGRyZXNzIn0sIHsibmFtZSI6ICJ2YWx1ZSIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogInZhbGlkQWZ0ZXIiLCAidHlwZSI6ICJ1aW50MjU2In0sIHsibmFtZSI6ICJ2YWxpZEJlZm9yZSIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogIm5vbmNlIiwgInR5cGUiOiAiYnl0ZXMzMiJ9XX0sICJhc3NldCI6ICJVU0RDIn19",
+    "signed_payload": "eyJ4NDAyVmVyc2lvbiI6ICIxLjAiLCAic2NoZW1lIjogImV4YWN0IiwgIm5ldHdvcmsiOiAiYmFzZSIsICJwYXlsb2FkIjogeyJzaWduYXR1cmUiOiAiMjg2NmNiODRkNWQzMWEzYzU3ZTdiMzdmMWNkYjUzNjcwNDQ5OGRkZWE0MTM0OWNkNWFmZGUxMGMzNGZiYThiMjM3MTNkZGM2MTA2OTdkOGQ2NTMyZDU1NjdkMmQ2MmFjZDMzMzYyYjM5MWU3ZjNlMTAzMTFjZTY4MzkzODZjYTAxYyIsICJhdXRob3JpemF0aW9uIjogeyJmcm9tIjogIjB4NTUyREY4N2RBNjU2MTE5QWI2NGVjOTViNGM5MDI1MDVDRTg3NjNjMCIsICJ0byI6ICIweDExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTEiLCAidmFsdWUiOiAiNTAwMDAiLCAidmFsaWRBZnRlciI6IDAsICJ2YWxpZEJlZm9yZSI6IDE3Njc0OTY3MDAsICJub25jZSI6ICIweDYzNzk2ZTA3M2E0OTMyMzYxZjM5N2U0NmYxMjUwOGEwZjE0NmRlN2FiZDRhM2JmMmZkYzQ4ZDlmMmIwN2M5MmQifSwgImRvbWFpbiI6IHsibmFtZSI6ICJVU0QgQ29pbiIsICJ2ZXJzaW9uIjogIjIiLCAiY2hhaW5JZCI6IDg0NTMsICJ2ZXJpZnlpbmdDb250cmFjdCI6ICIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMifSwgInR5cGVzIjogeyJFSVA3MTJEb21haW4iOiBbeyJuYW1lIjogIm5hbWUiLCAidHlwZSI6ICJzdHJpbmcifSwgeyJuYW1lIjogInZlcnNpb24iLCAidHlwZSI6ICJzdHJpbmcifSwgeyJuYW1lIjogImNoYWluSWQiLCAidHlwZSI6ICJ1aW50MjU2In0sIHsibmFtZSI6ICJ2ZXJpZnlpbmdDb250cmFjdCIsICJ0eXBlIjogImFkZHJlc3MifV0sICJUcmFuc2ZlcldpdGhBdXRob3JpemF0aW9uIjogW3sibmFtZSI6ICJmcm9tIiwgInR5cGUiOiAiYWRkcmVzcyJ9LCB7Im5hbWUiOiAidG8iLCAidHlwZSI6ICJhZGRyZXNzIn0sIHsibmFtZSI6ICJ2YWx1ZSIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogInZhbGlkQWZ0ZXIiLCAidHlwZSI6ICJ1aW50MjU2In0sIHsibmFtZSI6ICJ2YWxpZEJlZm9yZSIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogIm5vbmNlIiwgInR5cGUiOiAiYnl0ZXMzMiJ9XX0sICJhc3NldCI6ICJVU0RDIn19",
     "amount_usdc": 0.05,
-    "tx_hash": "0x2f36f3d780c664a1053e20415c20c2164129069e7c43bfd624029cbc289474ec",
+    "tx_hash": "0xed6e09c1249e438c16d3a2dd75357a5a943b1a797bc1e1990099446cba310dee",
     "last_http_status": 200,
     "last_response_headers": {
       "connection": "close",
-      "date": "Sun, 04 Jan 2026 01:46:37 GMT",
-      "payment-response": "eyJ0eEhhc2giOiAiMHgyZjM2ZjNkNzgwYzY2NGExMDUzZTIwNDE1YzIwYzIxNjQxMjkwNjllN2M0M2JmZDYyNDAyOWNiYzI4OTQ3NGVjIiwgInNldHRsZW1lbnRJZCI6ICI4NTg1NTY4ZTI5ZTJjMDNmZjU4ZjQyYjgwNzNhOTdmODM1NjJkOTJlZTBjMTJmOWJkNTE4YmU0MDYxNTZiMjdmIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
-      "server": "X402Mock/0.2 Python/3.14.0"
+      "date": "Sun, 04 Jan 2026 02:18:20 GMT",
+      "payment-response": "eyJ0eEhhc2giOiAiMHhlZDZlMDljMTI0OWU0MzhjMTZkM2EyZGQ3NTM1N2E1YTk0M2IxYTc5N2JjMWUxOTkwMDk5NDQ2Y2JhMzEwZGVlIiwgInNldHRsZW1lbnRJZCI6ICIyYTgyNzUxNzBkY2UxMTU2YzUyMzQ4ZThkYjQxODRlMzM5YTExMjI4NGNiM2ZhN2U5MGFiYWViYzkzOTgxYTI1IiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+      "server": "X402Mock/0.2 Python/3.13.0"
     },
     "last_response_text": "{\"result\": \"ok\", \"service\": \"Mock Weather Pro\"}",
     "error_type": null,
@@ -716,7 +954,7 @@
     },
     {
       "type": "tool",
-      "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True}",
+      "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
       "additional_kwargs": {}
     },
     {
@@ -728,7 +966,31 @@
     },
     {
       "type": "tool",
-      "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the requested service type (weather_data). The user specifically requested real-time rainfall data for Singapore, and this weather service is capable of providing weather data. It supports x402 payments which is required since the task has paid_required constraint. The other services are market report services which don't match the weather data requirement.\"",
+      "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.\"",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: is_payment_task=True service_type='weather_data' service_query='Singapore real-time rainfall weather data API' query_params={'location': 'Singapore', 'data_type': 'rainfall', 'timeframe': 'real-time'} constraints={'paid_required': True, 'location_specific': True, 'real_time_data': True}",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: selected_index=0 service_name='Mock Weather Pro' reason=\"Selected Mock Weather Pro because it's the only weather service available that matches the required service type (weather_data). The user needs real-time rainfall data for Singapore, and while this is a mock service, it's specifically designed for weather data and supports x402 payments. The other candidates are market report services which don't match the weather data requirement.\"",
       "additional_kwargs": {}
     },
     {
@@ -752,7 +1014,7 @@
     },
     {
       "type": "tool",
-      "content": "Returning structured response: selected_index=0 reason=\"Selected the first option (50,000 USDC) because it's the lower cost option and fits within the wallet balance constraints. The wallet has 10.0 USDC, which is insufficient for either option, but the negotiation system should select the more affordable option. The second option at 75,000 USDC is even more expensive. Both options use the Base network with USDC, which matches the user's preferences. The priority settlement note on the second option doesn't justify the 50% higher cost for the same service.\" policy_decision='auto'",
+      "content": "Returning structured response: selected_index=0 reason='Selected the first option (50,000 USDC) because it\\'s the lower cost option and matches the user\\'s preferences for Base network, USDC asset, and exact scheme. The wallet balance of 10.0 is insufficient for either option, but the agent should select the more affordable option when both exceed available funds. The second option at 75,000 USDC is 50% more expensive for \"priority settlement\" which doesn\\'t appear necessary for basic weather data access. The service domain is trusted (127.0.0.1 with domain_trusted: True), so there are no security concerns.' policy_decision='auto'",
       "additional_kwargs": {}
     }
   ]

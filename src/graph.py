@@ -1,4 +1,4 @@
-from langgraph.graph import END, StateGraph
+from langgraph.graph import END, START, StateGraph
 
 from src.nodes import (
     error_handler,
@@ -82,11 +82,8 @@ def route_after_reflection(state: AgentState) -> str:
     return END
 
 
-def build_graph(wallet_provider: WalletProvider, checkpointer=None):
+def build_payment_subgraph(wallet_provider: WalletProvider):
     builder = StateGraph(AgentState)
-    builder.add_node("intent_router", intent_router)
-    builder.add_node("service_registry", service_registry)
-    builder.add_node("normal_chat", normal_chat)
     builder.add_node("request_executor", request_executor)
     builder.add_node("header_parser", header_parser)
     builder.add_node("payment_negotiator", payment_negotiator)
@@ -97,17 +94,7 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
     builder.add_node("error_handler", error_handler)
     builder.add_node("reflection_rewriter", reflection_rewriter)
 
-    builder.set_entry_point("intent_router")
-    builder.add_conditional_edges(
-        "intent_router",
-        route_after_intent,
-        {
-            "normal_chat": "normal_chat",
-            "service_registry": "service_registry",
-        },
-    )
-    builder.add_edge("normal_chat", END)
-    builder.add_edge("service_registry", "request_executor")
+    builder.add_edge(START, "request_executor")
     builder.add_conditional_edges(
         "request_executor",
         route_after_request,
@@ -158,5 +145,27 @@ def build_graph(wallet_provider: WalletProvider, checkpointer=None):
             END: END,
         },
     )
+    return builder.compile()
+
+
+def build_graph(wallet_provider: WalletProvider, checkpointer=None):
+    builder = StateGraph(AgentState)
+    builder.add_node("intent_router", intent_router)
+    builder.add_node("service_registry", service_registry)
+    builder.add_node("normal_chat", normal_chat)
+    builder.add_node("payment_subgraph", build_payment_subgraph(wallet_provider))
+
+    builder.add_edge(START, "intent_router")
+    builder.add_conditional_edges(
+        "intent_router",
+        route_after_intent,
+        {
+            "normal_chat": "normal_chat",
+            "service_registry": "service_registry",
+        },
+    )
+    builder.add_edge("normal_chat", END)
+    builder.add_edge("service_registry", "payment_subgraph")
+    builder.add_edge("payment_subgraph", END)
 
     return builder.compile(checkpointer=checkpointer)
