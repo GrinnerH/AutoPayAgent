@@ -63,9 +63,9 @@ def route_after_human(state: AgentState) -> str:
 def route_after_error(state: AgentState) -> str:
     ctx = state["payment_ctx"]
     error_type = ctx.get("error_type")
-    if error_type in {"network_error", "http_server_error"} and ctx["network_retry_count"] < ctx["max_network_retries"]:
+    if error_type in {"network_error", "http_server_error"} and ctx.get("network_retry_count", 0) < ctx.get("max_network_retries", 3):
         return "request_executor"
-    if error_type in {"payment_verification_failed", "payment_loop"} and ctx["retry_count"] < ctx["max_payment_retries"]:
+    if error_type in {"payment_verification_failed", "payment_loop"} and ctx.get("retry_count", 0) < ctx.get("max_payment_retries", 3):
         return "reflection_rewriter"
     return END
 

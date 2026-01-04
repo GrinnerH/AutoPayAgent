@@ -48,8 +48,10 @@ class X402MockHandler(BaseHTTPRequestHandler):
             return
 
         if cfg.free:
-            body = json.dumps({"result": "ok", "service": cfg.name, "paid": False}).encode("utf-8")
-            self._send(200, headers={"Content-Type": "application/json"}, body=body)
+            body = {"result": "ok", "service": cfg.name, "paid": False}
+            if "weather-free" in cfg.path:
+                body.update({"temp_c": 29.0, "range": "today_only"})
+            self._send(200, headers={"Content-Type": "application/json"}, body=json.dumps(body).encode("utf-8"))
             return
 
         requirements = self._requirements(cfg)
@@ -105,7 +107,18 @@ class X402MockHandler(BaseHTTPRequestHandler):
             return
 
         receipt = settle_resp.json().get("receipt") or {"txHash": "0xmocktxhash"}
-        body = json.dumps({"result": "ok", "service": cfg.name}).encode("utf-8")
+        body = {"result": "ok", "service": cfg.name, "paid": True}
+        if "/api/weather" in cfg.path:
+            body.update(
+                {
+                    "hourly_temps": [28.8, 29.1, 29.4, 29.2],
+                    "rain_mm": 3.2,
+                    "range": "hourly_with_rain",
+                }
+            )
+        elif "/api/reports/coinbase" in cfg.path:
+            body.update({"summary": "Deep research report (paid).", "coverage": "full"})
+        body = json.dumps(body).encode("utf-8")
         self._send(200, headers={"PAYMENT-RESPONSE": _encode(receipt)}, body=body)
 
     def _requirements(self, cfg: ServiceConfig) -> Dict[str, Any]:

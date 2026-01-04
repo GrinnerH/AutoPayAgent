@@ -69,12 +69,21 @@ def _state_snapshot(state: AgentState) -> Dict[str, Any]:
         "selected_accept": ctx.get("selected_accept"),
         "policy_decision": state.get("policy_decision"),
         "human_approval_required": state.get("human_approval_required"),
+        "wallet_balance": state.get("wallet_balance"),
+        "budget_limit": state.get("budget_limit"),
+        "auto_approve_threshold": state.get("auto_approve_threshold"),
     }
 
 
 def intent_router(state: AgentState) -> AgentState:
     task_text = state.get("task_text")
     updates: Dict[str, Any] = {}
+    if "wallet_balance" not in state or state.get("wallet_balance") is None:
+        updates["wallet_balance"] = 10.0
+    if "budget_limit" not in state or state.get("budget_limit") is None:
+        updates["budget_limit"] = 5.0
+    if "auto_approve_threshold" not in state or state.get("auto_approve_threshold") is None:
+        updates["auto_approve_threshold"] = 1.0
     if task_text:
         llm = _get_llm(state)
         if not llm:
@@ -435,8 +444,13 @@ def payment_negotiator(state: AgentState) -> AgentState:
         }
     selected = None
     accepts = requirements.get("accepts", [])
+    normalized_accepts = []
+    for accept in accepts:
+        accept_copy = dict(accept)
+        accept_copy["amount_usdc"] = extract_amount_usdc(accept, requirements)
+        normalized_accepts.append(accept_copy)
     payload = {
-        "accepts": accepts,
+        "accepts": normalized_accepts,
         "preferences": state.get("payment_preferences", {}),
         "wallet_balance": state.get("wallet_balance", 0.0),
         "risk_flags": state.get("risk_flags", {}),
@@ -457,8 +471,17 @@ def payment_negotiator(state: AgentState) -> AgentState:
     updates["messages"] = messages
     if selected is None:
         return {
-            "payment_ctx": {"status": "failed", "error_type": "no_accepts"},
-            "audit_log": [{"event": "negotiation", "error": "no_accepts", "timestamp": int(time.time())}],
+            "payment_ctx": {"status": "failed", "error_type": "no_valid_accept"},
+            "policy_decision": "reject",
+            "audit_log": [
+                {
+                    "event": "negotiation",
+                    "error": "no_valid_accept",
+                    "selected_index": index,
+                    "accepts_count": len(accepts),
+                    "timestamp": int(time.time()),
+                }
+            ],
         }
     if not selected:
         updates["payment_ctx"] = {"status": "failed", "error_type": "no_accepts"}
@@ -512,15 +535,23 @@ def risk_assessor(state: AgentState) -> AgentState:
     ctx = state.get("payment_ctx", {})
     updates: Dict[str, Any] = {}
     amount = ctx.get("amount_usdc", 0.0)
+    if not ctx.get("selected_accept"):
+        updates["policy_decision"] = "reject"
+        updates["risk_reasons"] = ["no_accept_selected"]
+        updates["risk_score"] = 3.0
+        updates["payment_ctx"] = {"status": "failed", "error_type": "no_accept_selected"}
+        return _finalize()
     risk_flags = state.get("risk_flags", {})
     domain_trusted = risk_flags.get("domain_trusted", True)
     payee_reputation = risk_flags.get("payee_reputation", "unknown")
     policy_blocked = risk_flags.get("policy_blocked", False)
     force_reject = risk_flags.get("force_reject", False)
     policy = state.get("policy", {})
-    auto_pay_threshold = float(policy.get("auto_pay_threshold", state["auto_approve_threshold"]))
+    auto_pay_threshold = float(
+        policy.get("auto_pay_threshold", state.get("auto_approve_threshold", 0.1))
+    )
     hitl_threshold = float(policy.get("hitl_threshold", auto_pay_threshold))
-    hard_limit = float(policy.get("hard_limit", state["budget_limit"]))
+    hard_limit = float(policy.get("hard_limit", state.get("budget_limit", 1.0)))
     whitelist_domains = {d.lower() for d in policy.get("whitelist_domains", [])}
     whitelist_services = {s.lower() for s in policy.get("whitelist_services", [])}
     payee_blacklist = {p.lower() for p in policy.get("payee_blacklist", [])}
@@ -550,7 +581,7 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["payment_ctx"]["status"] = "risk_check"
         return updates
 
-    if state["wallet_balance"] < amount:
+    if state.get("wallet_balance", 0.0) < amount:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["insufficient_balance"]
         updates["risk_score"] = 3.0
@@ -596,7 +627,7 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["payment_ctx"] = {"status": "risk_check"}
         return _finalize()
 
-    if state["session_spend"] + amount > state["budget_limit"]:
+    if state.get("session_spend", 0.0) + amount > state.get("budget_limit", 1.0):
         updates["human_approval_required"] = True
         updates["policy_decision"] = "hitl"
         risk_reasons.append("budget_exceeded")

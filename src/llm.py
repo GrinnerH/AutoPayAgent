@@ -21,7 +21,7 @@ class IntentOutput(BaseModel):
 
 
 class NegotiationOutput(BaseModel):
-    selected_index: int = Field(default=0)
+    selected_index: int = Field(default=0, ge=0)
     reason: str
     policy_decision: str = Field(default="auto")
 
