@@ -3,34 +3,628 @@
   "error_type": null,
   "audit_log": [
     {
+      "event": "llm_intent",
+      "input": {
+        "task_text": "下载一份web3行业的市场研究报告"
+      },
+      "output": {
+        "structured_response": {
+          "is_payment_task": true,
+          "service_type": "market_research",
+          "service_query": "web3 market research report download",
+          "query_params": {
+            "industry": "web3",
+            "report_type": "market_research",
+            "language": "chinese"
+          },
+          "constraints": {
+            "paid_required": true,
+            "format": "downloadable",
+            "content_type": "report"
+          }
+        },
+        "messages": [
+          {
+            "type": "human",
+            "content": "下载一份web3行业的市场研究报告",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767500840
+    },
+    {
       "event": "intent",
       "intent": {
         "is_payment_task": true,
-        "service_type": "market_report",
-        "service_query": "深度研究报告 市场分析报告 付费研究报告",
+        "service_type": "market_research",
+        "service_query": "web3 market research report download",
         "query_params": {
-          "report_type": "深度研究报告",
-          "cost": "5 USDC"
+          "industry": "web3",
+          "report_type": "market_research",
+          "language": "chinese"
         },
         "constraints": {
           "paid_required": true,
-          "cost": "5 USDC"
+          "format": "downloadable",
+          "content_type": "report"
         }
       },
-      "timestamp": 1767490513
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500840
+    },
+    {
+      "event": "discovery",
+      "candidates": [
+        {
+          "name": "Mock Weather Pro",
+          "service_type": "weather",
+          "url": "http://127.0.0.1:18081/api/weather",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": true,
+          "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        },
+        {
+          "name": "Mock Market Intel",
+          "service_type": "market_report",
+          "url": "http://127.0.0.1:18082/api/reports/coinbase",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": false,
+          "description": "Paid deep research report with analysis and charts.",
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        }
+      ],
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "market_research",
+        "service_query": "web3 market research report download",
+        "query_params": {
+          "industry": "web3",
+          "report_type": "market_research",
+          "language": "chinese"
+        },
+        "constraints": {
+          "paid_required": true,
+          "format": "downloadable",
+          "content_type": "report"
+        }
+      },
+      "timestamp": 1767500840
+    },
+    {
+      "event": "llm_service_select",
+      "input": {
+        "service_query": "web3 market research report download",
+        "service_type": "market_research",
+        "candidates": [
+          {
+            "name": "Mock Weather Pro",
+            "service_type": "weather",
+            "url": "http://127.0.0.1:18081/api/weather",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": true,
+            "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          },
+          {
+            "name": "Mock Market Intel",
+            "service_type": "market_report",
+            "url": "http://127.0.0.1:18082/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": false,
+            "description": "Paid deep research report with analysis and charts.",
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          }
+        ]
+      },
+      "output": {
+        "structured_response": {
+          "selected_index": 1,
+          "service_name": "Mock Market Intel",
+          "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all."
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "{'service_query': 'web3 market research report download', 'service_type': 'market_research', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid deep research report with analysis and charts.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767500847
     },
     {
       "event": "service_select",
-      "selected_index": 0,
+      "selected_index": 1,
       "service_name": "Mock Market Intel",
-      "reason": "Mock Market Intel 是唯一可用的市场研究报告服务，支持x402支付，符合用户需要付费5 USDC获取深度研究报告的需求。该服务提供市场分析报告，虽然声誉为\"ok\"，但能满足用户的基本要求。",
-      "timestamp": 1767490519
+      "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all.",
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500847
+    },
+    {
+      "event": "llm_intent",
+      "input": {
+        "task_text": "下载一份web3行业的市场研究报告"
+      },
+      "output": {
+        "structured_response": {
+          "is_payment_task": true,
+          "service_type": "market_research",
+          "service_query": "web3 market research report download",
+          "query_params": {
+            "industry": "web3",
+            "report_type": "market_research",
+            "language": "chinese"
+          },
+          "constraints": {
+            "paid_required": true,
+            "format": "downloadable",
+            "content_type": "report"
+          }
+        },
+        "messages": [
+          {
+            "type": "human",
+            "content": "下载一份web3行业的市场研究报告",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767500840
+    },
+    {
+      "event": "intent",
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "market_research",
+        "service_query": "web3 market research report download",
+        "query_params": {
+          "industry": "web3",
+          "report_type": "market_research",
+          "language": "chinese"
+        },
+        "constraints": {
+          "paid_required": true,
+          "format": "downloadable",
+          "content_type": "report"
+        }
+      },
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500840
+    },
+    {
+      "event": "discovery",
+      "candidates": [
+        {
+          "name": "Mock Weather Pro",
+          "service_type": "weather",
+          "url": "http://127.0.0.1:18081/api/weather",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": true,
+          "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        },
+        {
+          "name": "Mock Market Intel",
+          "service_type": "market_report",
+          "url": "http://127.0.0.1:18082/api/reports/coinbase",
+          "http_method": "GET",
+          "supports_x402": true,
+          "reputation": "ok",
+          "whitelist_tag": false,
+          "description": "Paid deep research report with analysis and charts.",
+          "supports_retry": false,
+          "headers": {},
+          "body": null
+        }
+      ],
+      "intent": {
+        "is_payment_task": true,
+        "service_type": "market_research",
+        "service_query": "web3 market research report download",
+        "query_params": {
+          "industry": "web3",
+          "report_type": "market_research",
+          "language": "chinese"
+        },
+        "constraints": {
+          "paid_required": true,
+          "format": "downloadable",
+          "content_type": "report"
+        }
+      },
+      "timestamp": 1767500840
+    },
+    {
+      "event": "llm_service_select",
+      "input": {
+        "service_query": "web3 market research report download",
+        "service_type": "market_research",
+        "candidates": [
+          {
+            "name": "Mock Weather Pro",
+            "service_type": "weather",
+            "url": "http://127.0.0.1:18081/api/weather",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": true,
+            "description": "Paid weather: hourly temperatures + real-time rainfall metrics.",
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          },
+          {
+            "name": "Mock Market Intel",
+            "service_type": "market_report",
+            "url": "http://127.0.0.1:18082/api/reports/coinbase",
+            "http_method": "GET",
+            "supports_x402": true,
+            "reputation": "ok",
+            "whitelist_tag": false,
+            "description": "Paid deep research report with analysis and charts.",
+            "supports_retry": false,
+            "headers": {},
+            "body": null
+          }
+        ]
+      },
+      "output": {
+        "structured_response": {
+          "selected_index": 1,
+          "service_name": "Mock Market Intel",
+          "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all."
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "{'service_query': 'web3 market research report download', 'service_type': 'market_research', 'candidates': [{'name': 'Mock Weather Pro', 'service_type': 'weather', 'url': 'http://127.0.0.1:18081/api/weather', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': True, 'description': 'Paid weather: hourly temperatures + real-time rainfall metrics.', 'supports_retry': False, 'headers': {}, 'body': None}, {'name': 'Mock Market Intel', 'service_type': 'market_report', 'url': 'http://127.0.0.1:18082/api/reports/coinbase', 'http_method': 'GET', 'supports_x402': True, 'reputation': 'ok', 'whitelist_tag': False, 'description': 'Paid deep research report with analysis and charts.', 'supports_retry': False, 'headers': {}, 'body': None}]}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767500847
+    },
+    {
+      "event": "service_select",
+      "selected_index": 1,
+      "service_name": "Mock Market Intel",
+      "reason": "This service matches the user's requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn't explicitly mention web3 or Chinese language, it's described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn't match the task at all.",
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500847
     },
     {
       "event": "payment_required",
       "reason": null,
       "retry_count": 0,
-      "timestamp": 1767490519
+      "state": {
+        "status": "probing",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500847
+    },
+    {
+      "event": "request_executor",
+      "status_code": 402,
+      "url": "http://127.0.0.1:18082/api/reports/coinbase",
+      "has_signature": false,
+      "error_type": null,
+      "error_msg": null,
+      "state": {
+        "status": "probing",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500847
+    },
+    {
+      "event": "header_parser",
+      "accepts_count": 2,
+      "amount_usdc": 5.0,
+      "requirements": {
+        "x402Version": "1.0",
+        "accepts": [
+          {
+            "network": "base",
+            "asset": "USDC",
+            "decimals": 6,
+            "amount": "5000000",
+            "to": "0x2222222222222222222222222222222222222222",
+            "chainId": 8453,
+            "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "scheme": "exact"
+          },
+          {
+            "network": "base",
+            "asset": "USDC",
+            "decimals": 6,
+            "amount": "5025000",
+            "to": "0x2222222222222222222222222222222222222222",
+            "chainId": 8453,
+            "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "scheme": "exact",
+            "note": "priority settlement"
+          }
+        ]
+      },
+      "state": {
+        "status": "payment_required",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500847
+    },
+    {
+      "event": "llm_negotiation",
+      "input": {
+        "accepts": [
+          {
+            "network": "base",
+            "asset": "USDC",
+            "decimals": 6,
+            "amount": "5000000",
+            "to": "0x2222222222222222222222222222222222222222",
+            "chainId": 8453,
+            "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "scheme": "exact",
+            "amount_usdc": 5.0
+          },
+          {
+            "network": "base",
+            "asset": "USDC",
+            "decimals": 6,
+            "amount": "5025000",
+            "to": "0x2222222222222222222222222222222222222222",
+            "chainId": 8453,
+            "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "scheme": "exact",
+            "note": "priority settlement",
+            "amount_usdc": 5.025
+          }
+        ],
+        "preferences": {
+          "network": "base",
+          "asset": "usdc",
+          "scheme": "exact"
+        },
+        "wallet_balance": 10.0,
+        "risk_flags": {
+          "service_domain": "127.0.0.1",
+          "service_path": "/api/reports/coinbase",
+          "service_scheme": "http",
+          "domain_trusted": false,
+          "service_name": "Mock Market Intel"
+        }
+      },
+      "output": {
+        "structured_response": {
+          "selected_index": 0,
+          "reason": "I recommend accepting the first option (5.0 USDC) for the following reasons:\n\n1. **Cost Efficiency**: The first option costs 5.0 USDC while the second option costs 5.025 USDC for \"priority settlement.\" The 0.025 USDC premium (0.5% increase) for priority settlement doesn't seem justified for a market research report download.\n\n2. **Wallet Balance**: The user has 10.0 USDC in their wallet, so both options are affordable, but there's no need to pay extra for priority settlement on what appears to be a standard report download.\n\n3. **Risk Assessment**: The service has risk flags including an untrusted domain (127.0.0.1) and HTTP scheme. Given these security concerns, it's prudent to minimize the payment amount rather than pay extra for priority features.\n\n4. **Service Nature**: For a market research report download, standard settlement should be sufficient. There's no indication that immediate delivery is critical enough to warrant the premium.\n\n5. **Payment Scheme**: Both options use the 'exact' scheme which matches the user's preference, so there's no functional difference in payment method.\n\nThe first option provides the same core service at a lower cost, which is the rational choice given the circumstances.",
+          "policy_decision": "auto"
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "{'accepts': [{'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '5000000', 'to': '0x2222222222222222222222222222222222222222', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'amount_usdc': 5.0}, {'network': 'base', 'asset': 'USDC', 'decimals': 6, 'amount': '5025000', 'to': '0x2222222222222222222222222222222222222222', 'chainId': 8453, 'token_address': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'scheme': 'exact', 'note': 'priority settlement', 'amount_usdc': 5.025}], 'preferences': {'network': 'base', 'asset': 'usdc', 'scheme': 'exact'}, 'wallet_balance': 10.0, 'risk_flags': {'service_domain': '127.0.0.1', 'service_path': '/api/reports/coinbase', 'service_scheme': 'http', 'domain_trusted': False, 'service_name': 'Mock Market Intel'}}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "10.0",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: selected_index=0 reason='I recommend accepting the first option (5.0 USDC) for the following reasons:\\n\\n1. **Cost Efficiency**: The first option costs 5.0 USDC while the second option costs 5.025 USDC for \"priority settlement.\" The 0.025 USDC premium (0.5% increase) for priority settlement doesn\\'t seem justified for a market research report download.\\n\\n2. **Wallet Balance**: The user has 10.0 USDC in their wallet, so both options are affordable, but there\\'s no need to pay extra for priority settlement on what appears to be a standard report download.\\n\\n3. **Risk Assessment**: The service has risk flags including an untrusted domain (127.0.0.1) and HTTP scheme. Given these security concerns, it\\'s prudent to minimize the payment amount rather than pay extra for priority features.\\n\\n4. **Service Nature**: For a market research report download, standard settlement should be sufficient. There\\'s no indication that immediate delivery is critical enough to warrant the premium.\\n\\n5. **Payment Scheme**: Both options use the \\'exact\\' scheme which matches the user\\'s preference, so there\\'s no functional difference in payment method.\\n\\nThe first option provides the same core service at a lower cost, which is the rational choice given the circumstances.' policy_decision='auto'",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767500860
     },
     {
       "event": "negotiation",
@@ -49,19 +643,421 @@
         "amount_usdc": 5.0
       },
       "policy_decision": "auto",
-      "timestamp": 1767490527
+      "state": {
+        "status": "analyzing",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
+    },
+    {
+      "event": "policy",
+      "decision": "hitl",
+      "risk_score": 1.0,
+      "risk_reasons": [
+        "amount_over_hitl_threshold"
+      ],
+      "amount_usdc": 5.0,
+      "thresholds": {
+        "auto_pay_threshold": 1.0,
+        "hitl_threshold": 2.0,
+        "hard_limit": 10.0
+      },
+      "state": {
+        "status": "negotiating",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "policy_decision": "auto",
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
     },
     {
       "event": "hitl",
+      "prompt": {
+        "amount_usdc": 5.0,
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "reason": "Payment requires approval"
+      },
       "decision": "approve",
-      "timestamp": 1767490527
+      "state": {
+        "status": "risk_check",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "policy_decision": "hitl",
+        "human_approval_required": true,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
     },
     {
+      "event": "payment_signer",
+      "network": "base",
+      "asset": "USDC",
+      "amount_usdc": 5.0,
+      "authorization": {
+        "from": "0x71fd235096D27888ab6Beb4F40C4C59f4A061dF6",
+        "to": "0x2222222222222222222222222222222222222222",
+        "value": "5000000",
+        "validAfter": 0,
+        "validBefore": 1767504460,
+        "nonce": "0x41079fb3f9939276cc66ce826e275ad70b7d5a43ca932c83b46c6a8f9cafe73b"
+      },
+      "domain": {
+        "name": "USD Coin",
+        "version": "2",
+        "chainId": 8453,
+        "verifyingContract": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+      },
+      "types": {
+        "EIP712Domain": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "chainId",
+            "type": "uint256"
+          },
+          {
+            "name": "verifyingContract",
+            "type": "address"
+          }
+        ],
+        "TransferWithAuthorization": [
+          {
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "name": "validAfter",
+            "type": "uint256"
+          },
+          {
+            "name": "validBefore",
+            "type": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32"
+          }
+        ]
+      },
+      "state": {
+        "status": "risk_check",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "policy_decision": "hitl",
+        "human_approval_required": true,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
+    },
+    {
+      "event": "request_executor",
+      "status_code": 200,
+      "url": "http://127.0.0.1:18082/api/reports/coinbase",
+      "has_signature": true,
+      "error_type": null,
+      "error_msg": null,
+      "state": {
+        "status": "authorized",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "policy_decision": "hitl",
+        "human_approval_required": true,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
+    },
+    {
+      "event": "response_validator",
       "amount_usdc": 5.0,
       "payee": "0x2222222222222222222222222222222222222222",
       "network": "base",
-      "tx_hash": "0xfd2e8dbf543bf3fa19256b832834e129a7b5005a0cf68f079cb1579b3f82b17f",
-      "timestamp": 1767490527
+      "tx_hash": "0xb59eb8533f84d7111dad6cfcec298145a00bc752c41692edf6a2bae5802aa043",
+      "receipt_raw": "eyJ0eEhhc2giOiAiMHhiNTllYjg1MzNmODRkNzExMWRhZDZjZmNlYzI5ODE0NWEwMGJjNzUyYzQxNjkyZWRmNmEyYmFlNTgwMmFhMDQzIiwgInNldHRsZW1lbnRJZCI6ICJlOTc2ZTJkZmFjNmVlY2QwMGJjZjRlNmZkMDk3NGNkYmFlMzNjZTE3ZjJjY2M1NWYzZDViZmU0MmQ0NWE0ODdkIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+      "state": {
+        "status": "success",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 5.0,
+        "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+        "selected_accept": {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        "policy_decision": "hitl",
+        "human_approval_required": true,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767500860
+    }
+  ],
+  "intent": {
+    "is_payment_task": true,
+    "service_type": "market_research",
+    "service_query": "web3 market research report download",
+    "query_params": {
+      "industry": "web3",
+      "report_type": "market_research",
+      "language": "chinese"
+    },
+    "constraints": {
+      "paid_required": true,
+      "format": "downloadable",
+      "content_type": "report"
+    }
+  },
+  "selected_service": {
+    "name": "Mock Market Intel",
+    "service_type": "market_report",
+    "url": "http://127.0.0.1:18082/api/reports/coinbase",
+    "http_method": "GET",
+    "supports_x402": true,
+    "reputation": "ok",
+    "whitelist_tag": false,
+    "description": "Paid deep research report with analysis and charts.",
+    "supports_retry": false,
+    "headers": {},
+    "body": null
+  },
+  "policy": {
+    "whitelist_domains": [],
+    "whitelist_services": [],
+    "auto_pay_threshold": 1.0,
+    "hitl_threshold": 2.0,
+    "hard_limit": 10.0,
+    "daily_budget": 5.0,
+    "payee_blacklist": []
+  },
+  "payment_ctx": {
+    "target_url": "http://127.0.0.1:18082/api/reports/coinbase",
+    "http_method": "GET",
+    "request_headers": {},
+    "request_body": null,
+    "status": "success",
+    "requirements": {
+      "x402Version": "1.0",
+      "accepts": [
+        {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5000000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact"
+        },
+        {
+          "network": "base",
+          "asset": "USDC",
+          "decimals": 6,
+          "amount": "5025000",
+          "to": "0x2222222222222222222222222222222222222222",
+          "chainId": 8453,
+          "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "scheme": "exact",
+          "note": "priority settlement"
+        }
+      ]
+    },
+    "requirements_raw": "eyJ4NDAyVmVyc2lvbiI6ICIxLjAiLCAiYWNjZXB0cyI6IFt7Im5ldHdvcmsiOiAiYmFzZSIsICJhc3NldCI6ICJVU0RDIiwgImRlY2ltYWxzIjogNiwgImFtb3VudCI6ICI1MDAwMDAwIiwgInRvIjogIjB4MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMiIsICJjaGFpbklkIjogODQ1MywgInRva2VuX2FkZHJlc3MiOiAiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwgInNjaGVtZSI6ICJleGFjdCJ9LCB7Im5ldHdvcmsiOiAiYmFzZSIsICJhc3NldCI6ICJVU0RDIiwgImRlY2ltYWxzIjogNiwgImFtb3VudCI6ICI1MDI1MDAwIiwgInRvIjogIjB4MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMiIsICJjaGFpbklkIjogODQ1MywgInRva2VuX2FkZHJlc3MiOiAiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwgInNjaGVtZSI6ICJleGFjdCIsICJub3RlIjogInByaW9yaXR5IHNldHRsZW1lbnQifV19",
+    "selected_accept": {
+      "network": "base",
+      "asset": "USDC",
+      "decimals": 6,
+      "amount": "5000000",
+      "to": "0x2222222222222222222222222222222222222222",
+      "chainId": 8453,
+      "token_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "scheme": "exact"
+    },
+    "signed_payload": "eyJ4NDAyVmVyc2lvbiI6ICIxLjAiLCAic2NoZW1lIjogImV4YWN0IiwgIm5ldHdvcmsiOiAiYmFzZSIsICJwYXlsb2FkIjogeyJzaWduYXR1cmUiOiAiZGM5MWU5MzQwMTUxM2E5ZDNlMjRhOWY3N2NjYjQ0NzBmYTBkZGU5NjM4NDU1YjVlNGE0NmRkN2Y4ODY5MTc4MzAzYTA3OWFlMGMxYjJkMmNlNzVhY2RkM2M5N2I2YTRlOTEzOTY0MGUzYzI0Y2FhZjcxMmRlMTRkMjJiYzViZDIxYiIsICJhdXRob3JpemF0aW9uIjogeyJmcm9tIjogIjB4NzFmZDIzNTA5NkQyNzg4OGFiNkJlYjRGNDBDNEM1OWY0QTA2MWRGNiIsICJ0byI6ICIweDIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIiLCAidmFsdWUiOiAiNTAwMDAwMCIsICJ2YWxpZEFmdGVyIjogMCwgInZhbGlkQmVmb3JlIjogMTc2NzUwNDQ2MCwgIm5vbmNlIjogIjB4NDEwNzlmYjNmOTkzOTI3NmNjNjZjZTgyNmUyNzVhZDcwYjdkNWE0M2NhOTMyYzgzYjQ2YzZhOGY5Y2FmZTczYiJ9LCAiZG9tYWluIjogeyJuYW1lIjogIlVTRCBDb2luIiwgInZlcnNpb24iOiAiMiIsICJjaGFpbklkIjogODQ1MywgInZlcmlmeWluZ0NvbnRyYWN0IjogIjB4ODMzNTg5ZkNENmVEYjZFMDhmNGM3QzMyRDRmNzFiNTRiZEEwMjkxMyJ9LCAidHlwZXMiOiB7IkVJUDcxMkRvbWFpbiI6IFt7Im5hbWUiOiAibmFtZSIsICJ0eXBlIjogInN0cmluZyJ9LCB7Im5hbWUiOiAidmVyc2lvbiIsICJ0eXBlIjogInN0cmluZyJ9LCB7Im5hbWUiOiAiY2hhaW5JZCIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogInZlcmlmeWluZ0NvbnRyYWN0IiwgInR5cGUiOiAiYWRkcmVzcyJ9XSwgIlRyYW5zZmVyV2l0aEF1dGhvcml6YXRpb24iOiBbeyJuYW1lIjogImZyb20iLCAidHlwZSI6ICJhZGRyZXNzIn0sIHsibmFtZSI6ICJ0byIsICJ0eXBlIjogImFkZHJlc3MifSwgeyJuYW1lIjogInZhbHVlIiwgInR5cGUiOiAidWludDI1NiJ9LCB7Im5hbWUiOiAidmFsaWRBZnRlciIsICJ0eXBlIjogInVpbnQyNTYifSwgeyJuYW1lIjogInZhbGlkQmVmb3JlIiwgInR5cGUiOiAidWludDI1NiJ9LCB7Im5hbWUiOiAibm9uY2UiLCAidHlwZSI6ICJieXRlczMyIn1dfSwgImFzc2V0IjogIlVTREMifX0=",
+    "amount_usdc": 5.0,
+    "tx_hash": "0xb59eb8533f84d7111dad6cfcec298145a00bc752c41692edf6a2bae5802aa043",
+    "last_http_status": 200,
+    "last_response_headers": {
+      "connection": "close",
+      "date": "Sun, 04 Jan 2026 04:27:40 GMT",
+      "payment-response": "eyJ0eEhhc2giOiAiMHhiNTllYjg1MzNmODRkNzExMWRhZDZjZmNlYzI5ODE0NWEwMGJjNzUyYzQxNjkyZWRmNmEyYmFlNTgwMmFhMDQzIiwgInNldHRsZW1lbnRJZCI6ICJlOTc2ZTJkZmFjNmVlY2QwMGJjZjRlNmZkMDk3NGNkYmFlMzNjZTE3ZjJjY2M1NWYzZDViZmU0MmQ0NWE0ODdkIiwgInN0YXR1cyI6ICJzZXR0bGVkIn0=",
+      "server": "X402Mock/0.2 Python/3.13.0"
+    },
+    "last_response_text": "{\"result\": \"ok\", \"service\": \"Mock Market Intel\", \"paid\": true, \"summary\": \"Deep research report (paid).\", \"coverage\": \"full\"}",
+    "error_type": null,
+    "error_msg": null,
+    "retry_count": 0,
+    "network_retry_count": 0,
+    "max_payment_retries": 3,
+    "max_network_retries": 3
+  },
+  "messages": [
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: is_payment_task=True service_type='market_research' service_query='web3 market research report download' query_params={'industry': 'web3', 'report_type': 'market_research', 'language': 'chinese'} constraints={'paid_required': True, 'format': 'downloadable', 'content_type': 'report'}",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: selected_index=1 service_name='Mock Market Intel' reason='This service matches the user\\'s requirements for a paid market research report. The user specifically requested a web3 market research report in Chinese that is downloadable. While the service description doesn\\'t explicitly mention web3 or Chinese language, it\\'s described as a \"Paid deep research report with analysis and charts\" which aligns with the market research report requirement. The service supports x402 payments as required. Among the available candidates, this is the only market research/report service, while the other is a weather service which doesn\\'t match the task at all.'",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "10.0",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: selected_index=0 reason='I recommend accepting the first option (5.0 USDC) for the following reasons:\\n\\n1. **Cost Efficiency**: The first option costs 5.0 USDC while the second option costs 5.025 USDC for \"priority settlement.\" The 0.025 USDC premium (0.5% increase) for priority settlement doesn\\'t seem justified for a market research report download.\\n\\n2. **Wallet Balance**: The user has 10.0 USDC in their wallet, so both options are affordable, but there\\'s no need to pay extra for priority settlement on what appears to be a standard report download.\\n\\n3. **Risk Assessment**: The service has risk flags including an untrusted domain (127.0.0.1) and HTTP scheme. Given these security concerns, it\\'s prudent to minimize the payment amount rather than pay extra for priority features.\\n\\n4. **Service Nature**: For a market research report download, standard settlement should be sufficient. There\\'s no indication that immediate delivery is critical enough to warrant the premium.\\n\\n5. **Payment Scheme**: Both options use the \\'exact\\' scheme which matches the user\\'s preference, so there\\'s no functional difference in payment method.\\n\\nThe first option provides the same core service at a lower cost, which is the rational choice given the circumstances.' policy_decision='auto'",
+      "additional_kwargs": {}
     }
   ]
 }

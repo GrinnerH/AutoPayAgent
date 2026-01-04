@@ -317,19 +317,6 @@ def default_service_registry() -> List[Dict[str, Any]]:
             "headers": {},
             "body": None,
         },
-        {
-            "name": "Mock Market Intel Retry",
-            "service_type": "market_report_retry",
-            "url": "http://127.0.0.1:18083/api/reports/coinbase",
-            "http_method": "GET",
-            "supports_x402": True,
-            "reputation": "ok",
-            "whitelist_tag": False,
-            "description": "Paid report service that intentionally fails first verification to test retry/reflection.",
-            "supports_retry": True,
-            "headers": {},
-            "body": None,
-        },
     ]
 
 
@@ -393,7 +380,7 @@ def default_state(
             "whitelist_domains": list(cfg.get("whitelist_domains", ())),
             "whitelist_services": list(cfg.get("whitelist_services", ())),
             "auto_pay_threshold": float(cfg.get("auto_approve_threshold", 0.1)),
-            "hitl_threshold": float(cfg.get("hitl_threshold", 1.0)),
+            "hitl_threshold": float(cfg.get("hitl_threshold", 2.0)),
             "hard_limit": float(cfg.get("hard_limit", 10.0)),
             "daily_budget": float(cfg.get("budget_limit", 1.0)),
             "payee_blacklist": list(cfg.get("payee_blacklist", ())),

@@ -4,6 +4,7 @@ import time
 from typing import List, Optional
 
 import httpx
+import socket
 import uvicorn
 
 from src.facilitator_server import app as facilitator_app
@@ -42,67 +43,58 @@ def _start_facilitator() -> Optional[threading.Thread]:
 
 def _start_demo_services() -> List[object]:
     servers = []
-    servers.append(
-        start_server(
-            ServiceConfig(
-                name="Mock Free Info",
-                host="127.0.0.1",
-                port=18079,
-                path="/api/free",
-                amount_usdc=0.0,
-                payee="0x0000000000000000000000000000000000000000",
-                free=True,
-            )
+    def _port_in_use(host: str, port: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.2)
+            return sock.connect_ex((host, port)) == 0
+
+    def _maybe_start(config: ServiceConfig) -> None:
+        if _port_in_use(config.host, config.port):
+            return
+        try:
+            servers.append(start_server(config))
+        except OSError:
+            return
+    _maybe_start(
+        ServiceConfig(
+            name="Mock Free Info",
+            host="127.0.0.1",
+            port=18079,
+            path="/api/free",
+            amount_usdc=0.0,
+            payee="0x0000000000000000000000000000000000000000",
+            free=True,
         )
     )
-    servers.append(
-        start_server(
-            ServiceConfig(
-                name="Mock Weather Free",
-                host="127.0.0.1",
-                port=18080,
-                path="/api/weather-free",
-                amount_usdc=0.0,
-                payee="0x0000000000000000000000000000000000000000",
-                free=True,
-            )
+    _maybe_start(
+        ServiceConfig(
+            name="Mock Weather Free",
+            host="127.0.0.1",
+            port=18080,
+            path="/api/weather-free",
+            amount_usdc=0.0,
+            payee="0x0000000000000000000000000000000000000000",
+            free=True,
         )
     )
-    servers.append(
-        start_server(
-            ServiceConfig(
-                name="Mock Weather Pro",
-                host="127.0.0.1",
-                port=18081,
-                path="/api/weather",
-                amount_usdc=0.05,
-                payee="0x1111111111111111111111111111111111111111",
-            )
+    _maybe_start(
+        ServiceConfig(
+            name="Mock Weather Pro",
+            host="127.0.0.1",
+            port=18081,
+            path="/api/weather",
+            amount_usdc=0.05,
+            payee="0x1111111111111111111111111111111111111111",
         )
     )
-    servers.append(
-        start_server(
-            ServiceConfig(
-                name="Mock Market Intel",
-                host="127.0.0.1",
-                port=18082,
-                path="/api/reports/coinbase",
-                amount_usdc=5.00,
-                payee="0x2222222222222222222222222222222222222222",
-            )
-        )
-    )
-    servers.append(
-        start_server(
-            ServiceConfig(
-                name="Mock Market Intel Retry",
-                host="127.0.0.1",
-                port=18083,
-                path="/api/reports/coinbase",
-                amount_usdc=0.25,
-                payee="0x3333333333333333333333333333333333333333",
-                fail_first=True,
-            )
+    _maybe_start(
+        ServiceConfig(
+            name="Mock Market Intel",
+            host="127.0.0.1",
+            port=18082,
+            path="/api/reports/coinbase",
+            amount_usdc=5.00,
+            payee="0x2222222222222222222222222222222222222222",
         )
     )
     time.sleep(0.2)

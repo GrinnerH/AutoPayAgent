@@ -71,6 +71,15 @@ class X402MockHandler(BaseHTTPRequestHandler):
             self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "verification_failed"})
             return
 
+        fail_header = self.headers.get("X-MOCK-VERIFY-FAIL-ONCE")
+        client_id = self.headers.get("X-CLIENT-ID", "default")
+        if fail_header:
+            seen = self.server.fail_used_per_client  # type: ignore[attr-defined]
+            if client_id not in seen:
+                seen.add(client_id)
+                self._send(402, headers={"PAYMENT-REQUIRED": _encode(requirements), "X-REASON": "verification_failed"})
+                return
+
         facilitator = os.getenv("FACILITATOR_URL", "http://127.0.0.1:9000")
         try:
             verify_resp = httpx.post(
@@ -158,6 +167,7 @@ def start_server(config: ServiceConfig) -> ThreadingHTTPServer:
     server = ThreadingHTTPServer((config.host, config.port), X402MockHandler)
     server.cfg = config  # type: ignore[attr-defined]
     server.fail_used = False  # type: ignore[attr-defined]
+    server.fail_used_per_client = set()  # type: ignore[attr-defined]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server

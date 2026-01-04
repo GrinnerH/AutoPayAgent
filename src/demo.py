@@ -68,6 +68,32 @@ def _save_result(name: str, result: dict) -> None:
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
     print("saved log:", path)
+    md_path = os.path.join("logs", f"{name}.md")
+    audit = payload.get("audit_log", [])
+    with open(md_path, "w", encoding="utf-8") as handle:
+        handle.write(f"# {name} execution log\n\n")
+        handle.write("## Summary\n\n")
+        handle.write(f"- status: {payload.get('status')}\n")
+        handle.write(f"- error_type: {payload.get('error_type')}\n")
+        handle.write(f"- intent: {json.dumps(payload.get('intent'), ensure_ascii=False)}\n")
+        handle.write(f"- selected_service: {json.dumps(payload.get('selected_service'), ensure_ascii=False)}\n")
+        handle.write("\n## Node Trace\n\n")
+        for idx, entry in enumerate(audit, start=1):
+            event = entry.get("event", "unknown")
+            handle.write(f"### {idx}. {event}\n\n")
+            handle.write("```json\n")
+            handle.write(json.dumps(entry, ensure_ascii=False, indent=2))
+            handle.write("\n```\n\n")
+    print("saved log:", md_path)
+
+
+def _init_md_log(name: str) -> None:
+    os.makedirs("logs", exist_ok=True)
+    md_path = os.path.join("logs", f"{name}.md")
+    os.environ["LOG_MD_PATH"] = md_path
+    with open(md_path, "w", encoding="utf-8") as handle:
+        handle.write(f"# {name} execution log\n\n")
+        handle.write("## Node Trace\n\n")
 
 
 def _save_error(name: str, exc: Exception) -> None:
@@ -88,6 +114,7 @@ def run_demo_1():
     state = default_state(config=config.__dict__, task_text="帮我概括这段文字：这是一个关于区块链的入门介绍。")
     state["wallet_balance"] = 10.0
     try:
+        _init_md_log("demo-1")
         result = _invoke_with_interrupts(graph, state, "demo-1", auto_approve=True)
         print("demo-1 status:", result.get("payment_ctx", {}).get("status"))
         _save_result("demo-1", result)
@@ -103,6 +130,7 @@ def run_demo_2():
     state = default_state(config=config.__dict__, task_text="查询新加坡天气")
     state["wallet_balance"] = 10.0
     try:
+        _init_md_log("demo-2")
         result = _invoke_with_interrupts(graph, state, "demo-2", auto_approve=True)
         print("demo-2 status:", result.get("payment_ctx", {}).get("status"))
         _save_result("demo-2", result)
@@ -115,9 +143,10 @@ def run_demo_3():
     ensure_services_started()
     config, graph, llm_bundle = _build_graph()
     print("Demo-3 场景：小额自动支付")
-    state = default_state(config=config.__dict__, task_text="查询新加坡实时降雨量（使用付费服务）")
+    state = default_state(config=config.__dict__, task_text="查询新加坡实时降雨量")
     state["wallet_balance"] = 10.0
     try:
+        _init_md_log("demo-3")
         result = _invoke_with_interrupts(graph, state, "demo-3", auto_approve=True)
         print("demo-3 status:", result.get("payment_ctx", {}).get("status"))
         _save_result("demo-3", result)
@@ -130,9 +159,10 @@ def run_demo_4():
     ensure_services_started()
     config, graph, llm_bundle = _build_graph()
     print("Demo-4 场景：高额风险防控（HITL）")
-    state = default_state(config=config.__dict__, task_text="下载一份价值 5 USDC 的深度研究报告")
+    state = default_state(config=config.__dict__, task_text="下载一份web3行业的市场研究报告")
     state["wallet_balance"] = 10.0
     try:
+        _init_md_log("demo-4")
         result = _invoke_with_interrupts(graph, state, "demo-4", auto_approve=True)
         print("demo-4 status:", result.get("payment_ctx", {}).get("status"))
         _save_result("demo-4", result)
@@ -147,10 +177,12 @@ def run_demo_5():
     print("Demo-5 场景：支付反思与重试")
     state = default_state(
         config=config.__dict__,
-        task_text="调用付费服务获取研究报告，并在支付验证失败时进行反思重试",
+        task_text="下载一份web3行业的市场研究报告",
     )
+    state["payment_ctx"]["simulate_verification_failure"] = True
     state["wallet_balance"] = 10.0
     try:
+        _init_md_log("demo-5")
         result = _invoke_with_interrupts(graph, state, "demo-5", auto_approve=True)
         print("demo-5 status:", result.get("payment_ctx", {}).get("status"))
         _save_result("demo-5", result)

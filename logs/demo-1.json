@@ -3,6 +3,41 @@
   "error_type": null,
   "audit_log": [
     {
+      "event": "llm_intent",
+      "input": {
+        "task_text": "帮我概括这段文字：这是一个关于区块链的入门介绍。"
+      },
+      "output": {
+        "structured_response": {
+          "is_payment_task": false,
+          "service_type": "text_summarization",
+          "service_query": "",
+          "query_params": {},
+          "constraints": {}
+        },
+        "messages": [
+          {
+            "type": "human",
+            "content": "帮我概括这段文字：这是一个关于区块链的入门介绍。",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=False service_type='text_summarization' service_query='' query_params={} constraints={}",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767499444
+    },
+    {
       "event": "intent",
       "intent": {
         "is_payment_task": false,
@@ -11,12 +46,151 @@
         "query_params": {},
         "constraints": {}
       },
-      "timestamp": 1767490585
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767499444
+    },
+    {
+      "event": "llm_chat",
+      "input": {
+        "task_text": "帮我概括这段文字：这是一个关于区块链的入门介绍。"
+      },
+      "output": {
+        "structured_response": {
+          "response": "您希望我概括这段关于区块链入门介绍的文字。不过，您只提供了\"这是一个关于区块链的入门介绍\"这句话，这本身已经是一个概括性的描述。\n\n如果您有更长的原文需要概括，请提供完整的文字内容，我可以帮您进行摘要和概括。比如，如果原文包含区块链的定义、特点、工作原理、应用场景等内容，我可以为您提取关键信息，制作一个简洁的摘要。\n\n请提供需要概括的完整文字，我将为您进行专业的文本概括。"
+        },
+        "messages": [
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: is_payment_task=False service_type='text_summarization' service_query='' query_params={} constraints={}",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "human",
+            "content": "帮我概括这段文字：这是一个关于区块链的入门介绍。",
+            "additional_kwargs": {}
+          },
+          {
+            "type": "ai",
+            "content": "",
+            "additional_kwargs": {
+              "refusal": null
+            }
+          },
+          {
+            "type": "tool",
+            "content": "Returning structured response: response='您希望我概括这段关于区块链入门介绍的文字。不过，您只提供了\"这是一个关于区块链的入门介绍\"这句话，这本身已经是一个概括性的描述。\\n\\n如果您有更长的原文需要概括，请提供完整的文字内容，我可以帮您进行摘要和概括。比如，如果原文包含区块链的定义、特点、工作原理、应用场景等内容，我可以为您提取关键信息，制作一个简洁的摘要。\\n\\n请提供需要概括的完整文字，我将为您进行专业的文本概括。'",
+            "additional_kwargs": {}
+          }
+        ]
+      },
+      "timestamp": 1767499455
     },
     {
       "event": "normal_chat",
-      "response": "您希望我概括这段关于区块链的入门介绍文字。不过，您只提供了文字的主题描述，没有提供具体的文字内容。请提供您想要概括的具体文字内容，这样我才能为您进行准确的概括。",
-      "timestamp": 1767490589
+      "response": "您希望我概括这段关于区块链入门介绍的文字。不过，您只提供了\"这是一个关于区块链的入门介绍\"这句话，这本身已经是一个概括性的描述。\n\n如果您有更长的原文需要概括，请提供完整的文字内容，我可以帮您进行摘要和概括。比如，如果原文包含区块链的定义、特点、工作原理、应用场景等内容，我可以为您提取关键信息，制作一个简洁的摘要。\n\n请提供需要概括的完整文字，我将为您进行专业的文本概括。",
+      "state": {
+        "status": "idle",
+        "error_type": null,
+        "retry_count": 0,
+        "amount_usdc": 0.0,
+        "target_url": null,
+        "selected_accept": null,
+        "policy_decision": null,
+        "human_approval_required": false,
+        "wallet_balance": 10.0,
+        "budget_limit": 5.0,
+        "auto_approve_threshold": 1.0
+      },
+      "timestamp": 1767499455
+    }
+  ],
+  "intent": {
+    "is_payment_task": false,
+    "service_type": "text_summarization",
+    "service_query": "",
+    "query_params": {},
+    "constraints": {}
+  },
+  "selected_service": null,
+  "policy": {
+    "whitelist_domains": [],
+    "whitelist_services": [],
+    "auto_pay_threshold": 1.0,
+    "hitl_threshold": 1.0,
+    "hard_limit": 10.0,
+    "daily_budget": 5.0,
+    "payee_blacklist": []
+  },
+  "payment_ctx": {
+    "target_url": null,
+    "http_method": "GET",
+    "request_headers": {},
+    "request_body": null,
+    "status": "success",
+    "requirements": null,
+    "requirements_raw": null,
+    "selected_accept": null,
+    "signed_payload": null,
+    "amount_usdc": 0.0,
+    "tx_hash": null,
+    "last_http_status": null,
+    "last_response_headers": null,
+    "last_response_text": null,
+    "error_type": null,
+    "error_msg": null,
+    "retry_count": 0,
+    "network_retry_count": 0,
+    "max_payment_retries": 3,
+    "max_network_retries": 3
+  },
+  "messages": [
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: is_payment_task=False service_type='text_summarization' service_query='' query_params={} constraints={}",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "",
+      "additional_kwargs": {
+        "refusal": null
+      }
+    },
+    {
+      "type": "tool",
+      "content": "Returning structured response: response='您希望我概括这段关于区块链入门介绍的文字。不过，您只提供了\"这是一个关于区块链的入门介绍\"这句话，这本身已经是一个概括性的描述。\\n\\n如果您有更长的原文需要概括，请提供完整的文字内容，我可以帮您进行摘要和概括。比如，如果原文包含区块链的定义、特点、工作原理、应用场景等内容，我可以为您提取关键信息，制作一个简洁的摘要。\\n\\n请提供需要概括的完整文字，我将为您进行专业的文本概括。'",
+      "additional_kwargs": {}
+    },
+    {
+      "type": "ai",
+      "content": "您希望我概括这段关于区块链入门介绍的文字。不过，您只提供了\"这是一个关于区块链的入门介绍\"这句话，这本身已经是一个概括性的描述。\n\n如果您有更长的原文需要概括，请提供完整的文字内容，我可以帮您进行摘要和概括。比如，如果原文包含区块链的定义、特点、工作原理、应用场景等内容，我可以为您提取关键信息，制作一个简洁的摘要。\n\n请提供需要概括的完整文字，我将为您进行专业的文本概括。",
+      "additional_kwargs": {}
     }
   ]
 }

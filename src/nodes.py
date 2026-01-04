@@ -41,6 +41,29 @@ def _debug(message: str) -> None:
         print(message, flush=True)
 
 
+def _append_md(entries: list) -> None:
+    path = os.getenv("LOG_MD_PATH")
+    if not path:
+        thread_id = os.getenv("LOG_THREAD_ID", "langsmith-run")
+        path = os.path.join("logs", f"langsmith-{thread_id}.md")
+        os.environ["LOG_MD_PATH"] = path
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if not os.path.exists(path):
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write(f"# langsmith-{os.getenv('LOG_THREAD_ID', 'run')} execution log\n\n")
+                handle.write("## Node Trace\n\n")
+        with open(path, "a", encoding="utf-8") as handle:
+            for entry in entries:
+                event = entry.get("event", "unknown")
+                handle.write(f"## {event}\n\n")
+                handle.write("```json\n")
+                handle.write(json.dumps(entry, ensure_ascii=False, indent=2))
+                handle.write("\n```\n\n")
+    except OSError:
+        return
+
+
 def _serialize_messages(messages: list) -> list:
     serialized = []
     for message in messages:
@@ -78,6 +101,9 @@ def _state_snapshot(state: AgentState) -> Dict[str, Any]:
 def intent_router(state: AgentState) -> AgentState:
     task_text = state.get("task_text")
     updates: Dict[str, Any] = {}
+    thread_id = state.get("thread_id")
+    if thread_id:
+        os.environ["LOG_THREAD_ID"] = str(thread_id)
     if "wallet_balance" not in state or state.get("wallet_balance") is None:
         updates["wallet_balance"] = 10.0
     if "budget_limit" not in state or state.get("budget_limit") is None:
@@ -110,6 +136,7 @@ def intent_router(state: AgentState) -> AgentState:
                 "timestamp": int(time.time()),
             }
         ]
+        _append_md(updates["audit_log"])
     else:
         updates["intent"] = {
             "is_payment_task": True,
@@ -127,12 +154,13 @@ def intent_router(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         }
     ]
+    _append_md(updates["audit_log"])
     return updates
 
 
 def service_registry(state: AgentState) -> AgentState:
     if state.get("selected_service"):
-        return {
+        updates = {
             "audit_log": [
                 {
                     "event": "service_registry",
@@ -142,6 +170,8 @@ def service_registry(state: AgentState) -> AgentState:
                 }
             ]
         }
+        _append_md(updates["audit_log"])
+        return updates
     updates: Dict[str, Any] = {}
     ctx = state.get("payment_ctx", {})
 
@@ -173,6 +203,7 @@ def service_registry(state: AgentState) -> AgentState:
                 "timestamp": int(time.time()),
             }
         ]
+        _append_md(updates["audit_log"])
         return updates
 
     intent = state.get("intent") or {}
@@ -186,8 +217,6 @@ def service_registry(state: AgentState) -> AgentState:
     )
     if constraints.get("paid_required") is True:
         registry = [svc for svc in registry if svc.get("supports_x402") is True]
-    if constraints.get("require_retry_service") is True:
-        registry = [svc for svc in registry if svc.get("supports_retry") is True]
     updates["service_candidates"] = registry
     updates["audit_log"] = [
         {
@@ -197,14 +226,17 @@ def service_registry(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         }
     ]
+    _append_md(updates["audit_log"])
     selected = None
 
     llm = _get_llm(state)
     if not llm:
-        return {
+        updates = {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
             "audit_log": [{"event": "service_select", "error": "llm_required", "timestamp": int(time.time())}],
         }
+        _append_md(updates["audit_log"])
+        return updates
     history = list(state.get("messages", []))
     payload = {
         "service_query": service_query,
@@ -242,6 +274,7 @@ def service_registry(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         }
     ]
+    _append_md(updates["audit_log"])
 
     if not selected:
         selected = registry[0] if registry else None
@@ -283,6 +316,11 @@ def request_executor(state: AgentState) -> AgentState:
     if ctx.get("signed_payload"):
         headers["PAYMENT-SIGNATURE"] = ctx["signed_payload"]
         updates["payment_ctx"] = {"status": "submitted"}
+    if ctx.get("simulate_verification_failure"):
+        headers["X-MOCK-VERIFY-FAIL-ONCE"] = "1"
+        thread_id = state.get("thread_id")
+        if thread_id:
+            headers["X-CLIENT-ID"] = str(thread_id)
     if ctx.get("target_url"):
         updates["risk_flags"] = parse_service_identity(ctx["target_url"])
 
@@ -319,6 +357,7 @@ def request_executor(state: AgentState) -> AgentState:
                 "timestamp": int(time.time()),
             }
         ]
+        _append_md(updates["audit_log"])
         return updates
 
     updates.setdefault("payment_ctx", {})
@@ -392,6 +431,7 @@ def request_executor(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         }
     ]
+    _append_md(updates["audit_log"])
     return updates
 
 
@@ -417,7 +457,7 @@ def header_parser(state: AgentState) -> AgentState:
     if not accepts:
         return {"payment_ctx": {"status": "failed", "error_type": "no_accepts"}}
     amount_usdc = extract_amount_usdc(accepts[0], requirements)
-    return {
+    updates = {
         "payment_ctx": {"requirements": requirements, "status": "analyzing", "amount_usdc": amount_usdc},
         "audit_log": [
             {
@@ -430,6 +470,8 @@ def header_parser(state: AgentState) -> AgentState:
             }
         ],
     }
+    _append_md(updates["audit_log"])
+    return updates
 
 
 def payment_negotiator(state: AgentState) -> AgentState:
@@ -438,10 +480,12 @@ def payment_negotiator(state: AgentState) -> AgentState:
     requirements = ctx.get("requirements") or {}
     llm = _get_llm(state)
     if not llm:
-        return {
+        updates = {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
             "audit_log": [{"event": "negotiation", "error": "llm_required", "timestamp": int(time.time())}],
         }
+        _append_md(updates["audit_log"])
+        return updates
     selected = None
     accepts = requirements.get("accepts", [])
     normalized_accepts = []
@@ -470,7 +514,7 @@ def payment_negotiator(state: AgentState) -> AgentState:
         }
     updates["messages"] = messages
     if selected is None:
-        return {
+        updates = {
             "payment_ctx": {"status": "failed", "error_type": "no_valid_accept"},
             "policy_decision": "reject",
             "audit_log": [
@@ -483,6 +527,8 @@ def payment_negotiator(state: AgentState) -> AgentState:
                 }
             ],
         }
+        _append_md(updates["audit_log"])
+        return updates
     if not selected:
         updates["payment_ctx"] = {"status": "failed", "error_type": "no_accepts"}
         return updates
@@ -522,6 +568,7 @@ def payment_negotiator(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         },
     ]
+    _append_md(updates["audit_log"])
     updates["payment_ctx"] = {
         "selected_accept": selected,
         "amount_usdc": amount_usdc,
@@ -540,7 +587,9 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = ["no_accept_selected"]
         updates["risk_score"] = 3.0
         updates["payment_ctx"] = {"status": "failed", "error_type": "no_accept_selected"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
     risk_flags = state.get("risk_flags", {})
     domain_trusted = risk_flags.get("domain_trusted", True)
     payee_reputation = risk_flags.get("payee_reputation", "unknown")
@@ -586,21 +635,39 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = ["insufficient_balance"]
         updates["risk_score"] = 3.0
         updates["payment_ctx"] = {"status": "failed", "error_type": "insufficient_balance"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
 
     if policy_blocked or force_reject:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["policy_reject"]
         updates["risk_score"] = 3.0
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
 
     if amount > hard_limit:
         updates["policy_decision"] = "reject"
         updates["risk_reasons"] = ["hard_limit_exceeded"]
         updates["risk_score"] = 2.5
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
+
+    if amount > hitl_threshold:
+        updates["human_approval_required"] = True
+        updates["policy_decision"] = "hitl"
+        risk_reasons.append("amount_over_hitl_threshold")
+        risk_score += 1.0
+        updates["risk_reasons"] = risk_reasons
+        updates["risk_score"] = risk_score
+        updates["payment_ctx"] = {"status": "risk_check"}
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
 
     payee = (ctx.get("selected_accept") or {}).get("to", "")
     if payee and payee.lower() in payee_blacklist:
@@ -610,7 +677,9 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = risk_reasons
         updates["risk_score"] = risk_score
         updates["payment_ctx"] = {"status": "failed", "error_type": "policy_reject"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
 
     if whitelist_domains and service_domain in whitelist_domains:
         domain_trusted = True
@@ -625,7 +694,9 @@ def risk_assessor(state: AgentState) -> AgentState:
         updates["risk_reasons"] = risk_reasons
         updates["risk_score"] = risk_score
         updates["payment_ctx"] = {"status": "risk_check"}
-        return _finalize()
+        updates = _finalize()
+        _append_md(updates.get("audit_log", []))
+        return updates
 
     if state.get("session_spend", 0.0) + amount > state.get("budget_limit", 1.0):
         updates["human_approval_required"] = True
@@ -650,7 +721,9 @@ def risk_assessor(state: AgentState) -> AgentState:
     updates["risk_score"] = risk_score
     updates["risk_reasons"] = risk_reasons
     updates["risk_score"] = risk_score
-    return _finalize()
+    updates = _finalize()
+    _append_md(updates.get("audit_log", []))
+    return updates
 
 
 def reflection_rewriter(state: AgentState) -> AgentState:
@@ -659,10 +732,12 @@ def reflection_rewriter(state: AgentState) -> AgentState:
     error_type = ctx.get("error_type")
     llm = _get_llm(state)
     if not llm:
-        return {
+        updates = {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
             "audit_log": [{"event": "reflection", "error": "llm_required", "timestamp": int(time.time())}],
         }
+        _append_md(updates["audit_log"])
+        return updates
     history = list(state.get("messages", []))
     payload = {
         "error_type": error_type,
@@ -732,6 +807,7 @@ def reflection_rewriter(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         },
     ]
+    _append_md(updates["audit_log"])
     return updates
 
 
@@ -755,6 +831,7 @@ def human_approver(state: AgentState) -> AgentState:
             }
         ],
     }
+    _append_md(updates["audit_log"])
     if decision == "reject":
         updates["payment_ctx"] = {"status": "failed", "error_type": "user_reject"}
     return updates
@@ -821,7 +898,7 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
     }
 
     encoded = base64.b64encode(json.dumps(payload).encode("utf-8")).decode("utf-8")
-    return {
+    updates = {
         "payment_ctx": {"signed_payload": encoded, "status": "authorized"},
         "session_spend": state.get("session_spend", 0.0) + amount,
         "audit_log": [
@@ -838,6 +915,8 @@ def payment_signer(state: AgentState, wallet_provider: WalletProvider) -> AgentS
             }
         ],
     }
+    _append_md(updates["audit_log"])
+    return updates
 
 
 def response_validator(state: AgentState) -> AgentState:
@@ -849,7 +928,7 @@ def response_validator(state: AgentState) -> AgentState:
         receipt = parse_receipt(receipt_raw)
         tx_hash = receipt.get("txHash") or receipt.get("transactionHash") or receipt.get("hash") or receipt.get("raw")
 
-    return {
+    updates = {
         "payment_ctx": {"tx_hash": tx_hash, "status": "success"},
         "audit_log": [
             {
@@ -864,6 +943,8 @@ def response_validator(state: AgentState) -> AgentState:
             }
         ],
     }
+    _append_md(updates["audit_log"])
+    return updates
 
 
 def error_handler(state: AgentState) -> AgentState:
@@ -889,6 +970,7 @@ def error_handler(state: AgentState) -> AgentState:
             "timestamp": int(time.time()),
         }
     ]
+    _append_md(updates["audit_log"])
     return updates
 
 
@@ -896,14 +978,16 @@ def normal_chat(state: AgentState) -> AgentState:
     task_text = state.get("task_text") or ""
     llm = _get_llm(state)
     if not llm:
-        return {
+        updates = {
             "payment_ctx": {"status": "failed", "error_type": "llm_required"},
             "audit_log": [{"event": "normal_chat", "error": "llm_required", "timestamp": int(time.time())}],
         }
+        _append_md(updates["audit_log"])
+        return updates
     history = list(state.get("messages", []))
     result, messages, raw_result = llm.normal_chat(history, task_text, state.get("thread_id"))
     response_text = result.response
-    return {
+    updates = {
         "messages": messages + [AIMessage(content=response_text)],
         "payment_ctx": {"status": "success", "error_type": None},
         "audit_log": [
@@ -924,3 +1008,5 @@ def normal_chat(state: AgentState) -> AgentState:
             },
         ],
     }
+    _append_md(updates["audit_log"])
+    return updates

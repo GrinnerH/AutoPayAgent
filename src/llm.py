@@ -139,8 +139,6 @@ def build_llm_bundle_from_env() -> Optional[AgentBundle]:
             "Only set is_payment_task=true when the user explicitly requests external data access or a paid service. "
             "If the user explicitly says to use paid services, set constraints.paid_required=true. "
             "If the user mentions a price/cost or says a report costs money, set constraints.paid_required=true. "
-            "If the user asks to test verification failure, reflection, or retry after payment failure, "
-            "set constraints.require_retry_service=true and service_type=market_report_retry. "
             "If the user asks to call a specific API/service endpoint or to perform a paid request, set is_payment_task=true. "
             "Include a service_query suitable for service discovery only when is_payment_task=true."
         ),
